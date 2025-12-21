@@ -10,8 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v4
     - name: configure
-      run: ./configure --prefix=QUESTA
+      run: chmod +x configure; ./configure --prefix=QUESTA
 
     - name: Install dependencies
       run: make
