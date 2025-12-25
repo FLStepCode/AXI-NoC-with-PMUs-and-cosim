@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module throughput_wrapper (
+module mesh_throughput (
     input aresetn,
 
     output logic awready[16],

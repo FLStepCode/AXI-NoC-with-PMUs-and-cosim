@@ -35,3 +35,4 @@ transcript
 .cache
 .venv
 qrun.log
+modelsim.ini
