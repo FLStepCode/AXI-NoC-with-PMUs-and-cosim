@@ -35,10 +35,10 @@ wave:
 	vsim -view $(SIM_BUILD)/vsim.wlf
 
 $(CURDIR)/.venv/bin/activate: cctb/build/user_requirements.txt cctb/build/requirements.txt
-	@python3 -m venv cctb/build/venv; \
-	source cctb/build/venv/bin/activate; \
-	pip install -r cctb/build/requirements.txt; \
-	pip install -r cctb/build/user_requirements.txt
+	@python3 -m venv $(CURDIR)/.venv
+	@source $(CURDIR)/.venv/bin/activate
+	@pip install -r cctb/build/requirements.txt
+	@pip install -r cctb/build/user_requirements.txt
 
 clean_run:
 	@rm -rf $(SIM_BUILD)
