@@ -16,8 +16,14 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup tools
-      run: docker compose up;\
-        alias vsim=${{env.VSIM}}
+      run: docker compose up
+
+    - name: Add .utils to PATH
+      shell: bash
+      run: echo "$GITHUB_WORKSPACE/.utils" >> "$GITHUB_PATH"
+
+    - name: Ensure wrappers are executable
+      run: chmod +x .utils/vsim
 
     - name: configure
       run: chmod +x configure; ./configure --prefix=QUESTA
