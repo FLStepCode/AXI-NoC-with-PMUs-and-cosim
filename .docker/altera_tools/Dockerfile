@@ -16,9 +16,9 @@ COPY .qsim_license .qsim_license
 RUN apt install vish libxext-dev libx11-dev libxft2 vis -y
 
 ENV LM_LICENSE_FILE=/home/main/.qsim_license/LR-253982_License.dat
-ENV QUESTA_BIN=/home/altera/24.1std/questa_fse/bin
+ENV MODELSIM_BIN_DIR=/home/altera/24.1std/questa_fse/bin
 
-ENV PATH=${PATH}:${QUESTA_BIN}
+ENV PATH=${PATH}:${MODELSIM_BIN_DIR}
 RUN echo "LM_LICENSE_FILE=\"${LM_LICENSE_FILE}\"" >> /etc/environment
 RUN echo "SALT_LICENSE_SERVER=\"${LM_LICENSE_FILE}\"" >> /etc/environment
 
