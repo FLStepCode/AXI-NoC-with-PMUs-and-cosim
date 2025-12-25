@@ -1,3 +1,3 @@
 #!bin/bash
 
-docker run axi-noc-with-built-in-pmus-altera_tools:latest vsim "$@"
+docker run altera_tools:latest vsim "$@"
