@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
+    - name: Setup tools
+      run: docker compose up;\
+        export vsim="docker run axi-noc-with-built-in-pmus-altera_tools:latest vsim"
+
     - name: configure
       run: chmod +x configure; ./configure --prefix=QUESTA
 
