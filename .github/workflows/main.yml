@@ -26,5 +26,4 @@ jobs:
         alias vmap="${{env.ALTERA_TOOLS_CALL}} vmap"
         alias vsim="${{env.ALTERA_TOOLS_CALL}} vsim"
         alias vis="${{env.ALTERA_TOOLS_CALL}} vis"
-        chmod +x configure; ./configure --prefix=QUESTA
         make
