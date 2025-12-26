@@ -3,7 +3,6 @@ SHELL := /bin/bash
 TOPLEVEL_LANG ?= verilog
 
 CACHE_DIR ?= $(CURDIR)/.cache
-WORK_DIR ?= $(CACHE_DIR)/questa/work_dir
 
 COCOTB_TOPLEVEL ?= uart_loop
 COCOTB_TEST_MODULES ?= tb_example
@@ -33,8 +32,8 @@ VERILOG_SOURCES ?= $(foreach file,$(shell cat $(LIST_RTL)), $(CURDIR)/$(file))
 .PHONY: run clean
 
 run: $(VENV_DIR) $(VERILOG_SOURCES)
-	@mkdir -p $(SIM_BUILD) $(WORK_DIR)
-	@cp -r $(TB_DIR)//$(COCOTB_TEST_MODULES) $(SIM_BUILD)/..
+	@mkdir -p $(SIM_BUILD)
+	@cp -r $(TB_DIR)/$(COCOTB_TEST_MODULES) $(SIM_BUILD)/..
 	source $(VENV_DIR)/bin/activate; \
 	cd $(SIM_BUILD); \
 	make -f $(shell $(VENV_DIR)/bin/cocotb-config --makefiles)/Makefile.sim TOPLEVEL_LANG=$(TOPLEVEL_LANG) \
