@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  VSIM: "docker run axi-noc-with-built-in-pmus-altera_tools:latest vsim"
+  ALTERA_TOOLS_CALL: "docker run axi-noc-with-built-in-pmus-altera_tools:latest"
 
 jobs:
   build:
@@ -22,8 +22,12 @@ jobs:
       shell: bash
       run: echo "$GITHUB_WORKSPACE/.utils" >> "$GITHUB_PATH"
 
-    - name: Ensure wrappers are executable
-      run: chmod +x -R .utils
+    - name: Create aliasses
+      run: alias qrun="${{env.ALTERA_TOOLS_CALL}} qrun"; \
+        alias vlib="${{env.ALTERA_TOOLS_CALL}} vlib"; \
+        alias vmap="${{env.ALTERA_TOOLS_CALL}} vmap"; \
+        alias vsim="${{env.ALTERA_TOOLS_CALL}} vsim"; \
+        alias vis="${{env.ALTERA_TOOLS_CALL}} vis"
 
     - name: Configure makefile
       run: chmod +x configure; ./configure --prefix=QUESTA

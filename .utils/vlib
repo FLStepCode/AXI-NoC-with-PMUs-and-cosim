@@ -1,3 +1,0 @@
-#!/bin/bash
-
-docker run --mount type=bind,src=$PWD,dst=$PWD altera_tools:latest vlib "$@"
