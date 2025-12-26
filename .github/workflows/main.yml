@@ -8,7 +8,7 @@ on:
 
 env:
   WORKDIR: /mnt/work
-  ALTERA_TOOLS_CALL: "docker run --mount type=bind,src=$PWD,dst=/mnt/work altera_tools:latest"
+  ALTERA_TOOLS_CALL: "docker run --mount type=bind,src=$PWD,dst=/mnt/work --mac-address=${{ secrets.LM_LICENSE_MAC }} altera_tools:latest"
 
 jobs:
   build:
@@ -27,4 +27,4 @@ jobs:
       
     - name: Run make
       shell: bash
-      run: ${{env.ALTERA_TOOLS_CALL}} "cd ${{env.WORKDIR}}; make"
+      run: ${{env.ALTERA_TOOLS_CALL}} "cd ${{env.WORKDIR}} && make"
