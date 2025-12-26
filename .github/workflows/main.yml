@@ -18,11 +18,7 @@ jobs:
     - name: Setup tools
       run: docker compose up
 
-    - name: Add .utils to PATH
-      shell: bash
-      run: echo "$GITHUB_WORKSPACE/.utils" >> "$GITHUB_PATH"
-
-    - name: Create aliasses
+    - name: Run make
       shell: bash
       run: |
         alias qrun="${{env.ALTERA_TOOLS_CALL}} qrun"
@@ -30,9 +26,5 @@ jobs:
         alias vmap="${{env.ALTERA_TOOLS_CALL}} vmap"
         alias vsim="${{env.ALTERA_TOOLS_CALL}} vsim"
         alias vis="${{env.ALTERA_TOOLS_CALL}} vis"
-
-    - name: Configure makefile
-      run: chmod +x configure; ./configure --prefix=QUESTA
-
-    - name: Install dependencies
-      run: make
+        chmod +x configure; ./configure --prefix=QUESTA
+        make
