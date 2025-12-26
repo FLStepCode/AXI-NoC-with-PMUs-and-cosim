@@ -21,9 +21,10 @@ jobs:
     - name: Run make
       shell: bash
       run: |
-        alias qrun="${{env.ALTERA_TOOLS_CALL}} qrun"
-        alias vlib="${{env.ALTERA_TOOLS_CALL}} vlib"
-        alias vmap="${{env.ALTERA_TOOLS_CALL}} vmap"
-        alias vsim="${{env.ALTERA_TOOLS_CALL}} vsim"
-        alias vis="${{env.ALTERA_TOOLS_CALL}} vis"
+        alias qrun="${{env.ALTERA_TOOLS_CALL}} qrun"; \
+        alias vlib="${{env.ALTERA_TOOLS_CALL}} vlib"; \
+        alias vmap="${{env.ALTERA_TOOLS_CALL}} vmap"; \
+        alias vsim="${{env.ALTERA_TOOLS_CALL}} vsim"; \
+        alias vis="${{env.ALTERA_TOOLS_CALL}} vis"; \
+        chmod +x configure; ./configure --prefix=QUESTA; \
         make
