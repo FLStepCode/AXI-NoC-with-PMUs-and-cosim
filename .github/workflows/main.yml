@@ -6,12 +6,25 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  WORKDIR: /mnt/work
+  ALTERA_TOOLS_CALL: "docker run --mount type=bind,src=$PWD,dst=/mnt/work --mac-address=4e:dc:e2:0a:bc:fb altera_tools:latest"
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: configure
-      run: ./configure --prefix=QUESTA
+    - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: make
+    - name: Setup tools
+      run: docker compose up
+
+    - name: Run configure
+      shell: bash
+      run: |
+        chmod +x configure
+        ${{env.ALTERA_TOOLS_CALL}} "${{env.WORKDIR}}/configure --prefix=QUESTA"
+      
+    - name: Run test
+      shell: bash
+      run: ${{env.ALTERA_TOOLS_CALL}} "cd ${{env.WORKDIR}} && make"

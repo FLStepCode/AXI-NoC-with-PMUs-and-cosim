@@ -2,48 +2,54 @@ SHELL := /bin/bash
 
 TOPLEVEL_LANG ?= verilog
 
-TOPLEVEL ?= axi_unwrap
+CACHE_DIR ?= $(CURDIR)/.cache
 
-MODULE ?= tb_axi
+COCOTB_TOPLEVEL ?= uart_loop
+COCOTB_TEST_MODULES ?= tb_example
+TB_DIR ?= $(CURDIR)/tb
+TB_EXT ?= sv
 
 LIST_DIR ?= $(CURDIR)/rtl/lists
 LIST_RTL ?= $(LIST_DIR)/files_rtl.lst
 
+INCLUDE_DIRS ?=
+INCLUDE_DIRS += $(CURDIR)/rtl/axi
+INCLUDE_DIRS += $(CURDIR)/rtl/cores/src
+
+TB_FILES ?=  $(foreach file,$(shell find tb/ -type f -name '*.sv'), $(CURDIR)/$(file))
+
 SIM ?= questa
-SIM_ARGS := -suppress 12110 -autofindloop -voptargs="\""-access=rw+/. -debug,cell"\"" -suppress 12130
-CCTB_DIR ?= .cache/cctb
-SIM_BUILD ?= $(CCTB_DIR)/$(MODULE)
+SIM_ARGS := -suppress 12110 -autofindloop -suppress 12130
+CCTB_DIR ?= $(CACHE_DIR)/cctb
+SIM_BUILD ?= $(CCTB_DIR)/$(COCOTB_TEST_MODULES)
 
-VERILOG_SOURCES ?= 
-VERILOG_SOURCES += $$(cat $(LIST_RTL))
-
-COCOTB_MAKEFILES := $$(cocotb-config --makefiles)
+VENV_DIR ?= $(CCTB_DIR)/.venv
 
 WAVES ?= 1
 
-.PHONY: run clean_run clean_all_runs clean_all clean_venv
+VERILOG_SOURCES ?= $(foreach file,$(shell cat $(LIST_RTL)), $(CURDIR)/$(file))
 
-run: $(CURDIR)/.venv/bin/activate
-	@source $(CURDIR)/.venv/bin/activate
+.PHONY: run wave clean_module
+
+runt: $(VENV_DIR) $(VERILOG_SOURCES)
 	@mkdir -p $(SIM_BUILD)
-	@make -f $(COCOTB_MAKEFILES)/Makefile.sim TOPLEVEL_LANG=$(TOPLEVEL_LANG) \
-	TOPLEVEL=$(TOPLEVEL) MODULE=$(MODULE) SIM=$(SIM) SIM_BUILD=$(SIM_BUILD) \
+	@cp -r $(TB_DIR)/$(COCOTB_TEST_MODULES) $(SIM_BUILD)/..
+	source $(VENV_DIR)/bin/activate; \
+	cd $(SIM_BUILD); \
+	make -f $(shell $(VENV_DIR)/bin/cocotb-config --makefiles)/Makefile.sim TOPLEVEL_LANG=$(TOPLEVEL_LANG) \
+	COCOTB_TOPLEVEL=$(COCOTB_TOPLEVEL) COCOTB_TEST_MODULES=$(COCOTB_TEST_MODULES) SIM=$(SIM) SIM_BUILD=$(SIM_BUILD) \
 	SIM_ARGS='$(SIM_ARGS)' WAVES=$(WAVES) \
-	VERILOG_SOURCES="$(VERILOG_SOURCES)"
+	VERILOG_SOURCES="$(VERILOG_SOURCES) $(TB_FILES)"
 
 wave:
 	vsim -view $(SIM_BUILD)/vsim.wlf
 
-$(CURDIR)/.venv/bin/activate: cctb/build/user_requirements.txt cctb/build/requirements.txt
-	@python3 -m venv cctb/build/venv; \
-	source cctb/build/venv/bin/activate; \
+$(VENV_DIR): cctb/build/user_requirements.txt cctb/build/requirements.txt
+	python3 -m venv $(VENV_DIR)
+	source $(VENV_DIR)/bin/activate; \
 	pip install -r cctb/build/requirements.txt; \
 	pip install -r cctb/build/user_requirements.txt
 
-clean_run:
+
+clean_module:
 	@rm -rf $(SIM_BUILD)
-
-clean_venv:
-	@rm -rf $(CURDIR)/.venv
-
-clean_all: clean_runs clean_venv

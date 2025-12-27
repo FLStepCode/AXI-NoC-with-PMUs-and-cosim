@@ -1,0 +1,4 @@
+services:
+  altera_tools:
+    image: altera_tools:latest
+    build: .docker/altera_tools

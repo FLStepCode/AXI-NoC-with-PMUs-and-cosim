@@ -32,4 +32,7 @@ rtl/boards/DE10-Standard/*
 *.bak
 transcript
 
-venv
+.cache
+.venv
+qrun.log
+modelsim.ini

@@ -1,0 +1,6 @@
+cocotb==2.0
+coverage
+pytest
+ipython
+cocotbext_axi
+cocotbext_uart
