@@ -36,7 +36,7 @@ run_pytest: $(VENV_DIR)
 	export INCLUDE_DIRS="$(INCLUDE_DIRS)"; \
 	export VERILOG_SOURCES="$(sort $(VERILOG_SOURCES) $(TB_FILES))"; \
 	export LOGS_DIR=${LOGS_DIR}; \
-	export RESULTS_XML=${RESULTS_XML}; \
+	export RESULTS_DIR=${RESULTS_DIR}; \
 	export BUILD_DIR="$(BUILD_DIR)"; \
 	source $(VENV_DIR)/bin/activate; \
 	python3 -m pytest --junit-xml=${RESULTS_DIR}/all.xml

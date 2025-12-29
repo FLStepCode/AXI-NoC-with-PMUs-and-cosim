@@ -10,7 +10,7 @@ INCLUDE_DIRS      = environ['INCLUDE_DIRS'].strip().split(' ')
 COCOTB_TESTS_DIRS = environ['TESTS_DIRS'].strip().split(' ')
 BUILD_DIR         = environ['BUILD_DIR']
 LOGS_DIR          = environ['LOGS_DIR']
-RESULTS_XML       = environ['RESULTS_XML']
+RESULTS_DIR       = environ['RESULTS_DIR']
 
 def _have_questa() -> bool:
     return shutil.which('vsim') is not None or shutil.which('qrun') is not None
@@ -23,6 +23,8 @@ def test_cocotb(cocotb_test_dir) -> None:
 
     test_dir = BUILD_DIR
     makedirs(test_dir, exist_ok=True)
+    makedirs(LOGS_DIR, exist_ok=True)
+    makedirs(RESULTS_DIR, exist_ok=True)
 
     copytree(cocotb_test_dir, test_dir, dirs_exist_ok=True)
 
@@ -47,5 +49,5 @@ def test_cocotb(cocotb_test_dir) -> None:
         test_dir=test_dir,
         waves=False,
         log_file=LOGS_DIR+f'/{test_module}.log',
-        results_xml=RESULTS_XML+f'/{test_module}.xml'
+        results_xml=RESULTS_DIR+f'/{test_module}.xml'
     )
