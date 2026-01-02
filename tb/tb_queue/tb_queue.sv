@@ -24,6 +24,6 @@ module tb_queue(
     assign axis_out.TREADY = s_tready;
     
     queue queue_name(clk, rst_n, axis_in, axis_out);
-    stream_fifo #(.DATA_TYPE(logic [31:0])) stream_fifo(clk, rst_n, m_tdata, m_tvalid, m_tready_alt, s_tdata_alt, s_tvalid_alt, s_tready);
+    stream_fifo #(.DATA_WIDTH(32)) stream_fifo(clk, rst_n, m_tdata, m_tvalid, m_tready_alt, s_tdata_alt, s_tvalid_alt, s_tready);
 
 endmodule

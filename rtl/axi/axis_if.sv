@@ -1,3 +1,5 @@
+`include "defines.svh"
+
 interface axis_if #(
     parameter DATA_WIDTH = 32
     `ifdef TID_PRESENT
