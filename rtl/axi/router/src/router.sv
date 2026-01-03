@@ -1,3 +1,5 @@
+`include "defines.svh"
+
 module router #(
     parameter DATA_WIDTH = 32
     `ifdef TID_PRESENT

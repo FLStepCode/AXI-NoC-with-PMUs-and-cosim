@@ -1,3 +1,5 @@
+`include "defines.svh"
+
 module axis_if_demux #(
     parameter CHANNEL_NUMBER = 5,
     parameter CHANNEL_NUMBER_WIDTH = $clog2(CHANNEL_NUMBER),

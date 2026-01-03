@@ -26,11 +26,18 @@ TESTS_DIR   ?= $(BUILD_DIR)/tests
 LOGS_DIR    ?= $(TESTS_DIR)/logs
 RESULTS_DIR ?= ${LOGS_DIR}/results
 
+BUILD_ARGS ?=
+SIM_ARGS ?= -suppress 12110 -autofindloop -suppress 12130
+
+COCOTB_TEST_MODULES ?= tb_example
+
 .PHONY: all test clean run_pytest
 all: test
 
 test: $(VENV_DIR)
-	make -f $(CCTB_MAKEFILE) run CACHE_DIR=$(CACHE_DIR) VENV_DIR=$(VENV_DIR) INCLUDE_DIRS=$(INCLUDE_DIRS)
+	make -f $(CCTB_MAKEFILE) run CACHE_DIR=$(CACHE_DIR) \
+	VENV_DIR=$(VENV_DIR) INCLUDE_DIRS=$(INCLUDE_DIRS) \
+	COCOTB_TEST_MODULES=$(COCOTB_TEST_MODULES)
 
 run_pytest: $(VENV_DIR)
 	@export TESTS_DIRS="$(TESTS_DIRS)"; \
@@ -40,6 +47,8 @@ run_pytest: $(VENV_DIR)
 	export RESULTS_DIR=${RESULTS_DIR}; \
 	export TESTS_DIR=${TESTS_DIR}; \
 	export BUILD_DIR="$(BUILD_DIR)"; \
+	export BUILD_ARGS="$(BUILD_ARGS)"; \
+	export SIM_ARGS="$(SIM_ARGS)"; \
 	source $(VENV_DIR)/bin/activate; \
 	python3 -m pytest --junit-xml=${RESULTS_DIR}/all.xml
 

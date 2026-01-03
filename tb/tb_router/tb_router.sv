@@ -1,3 +1,6 @@
+`include "defines.svh"
+`include "axi2axis_typedef.svh"
+
 module tb_router (
     input aclk,
     input aresetn,
@@ -93,8 +96,8 @@ module tb_router (
                 .s_axi_in(axi[i]),
                 .m_axi_out(axi_ram[i]),
                 
-                .s_axis_in(axis_from_q[i]),
-                .m_axis_out(axis_to_q[i])
+                .s_axis_resp_in(axis_from_q[i]),
+                .m_axis_resp_out(axis_to_q[i])
             );
         end
     endgenerate

@@ -19,6 +19,6 @@ async def test(dut):
         for _ in range(10000):
             await RisingEdge(dut.clk)
 
-    with open("../../rtl/tb/tb_cpu/mem_dump", "w+") as f:
+    with open("mem_dump", "w+") as f:
         for i in range(2**16):
             f.write(f"{dut.ram.generate_rams[0].coupled_ram.ram[i].value.binstr}\n")

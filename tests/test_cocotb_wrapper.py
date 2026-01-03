@@ -12,6 +12,8 @@ BUILD_DIR         = environ['BUILD_DIR']
 TESTS_DIR         = environ['TESTS_DIR']
 LOGS_DIR          = environ['LOGS_DIR']
 RESULTS_DIR       = environ['RESULTS_DIR']
+BUILD_ARGS        = environ['BUILD_ARGS'].strip().split(' ')
+SIM_ARGS          = environ['SIM_ARGS'].strip().split(' ')
 
 def _have_questa() -> bool:
     return shutil.which('vsim') is not None or shutil.which('qrun') is not None
@@ -34,6 +36,7 @@ def test_cocotb(cocotb_test_dir) -> None:
 
     runner.build(
         hdl_library='work',
+        build_args=BUILD_ARGS,
         sources=VERILOG_SOURCES,
         includes=INCLUDE_DIRS,
         hdl_toplevel=hdl_toplevel,
@@ -43,6 +46,7 @@ def test_cocotb(cocotb_test_dir) -> None:
 
     runner.test(
         hdl_toplevel_library='../work',
+        test_args=SIM_ARGS,
         test_module=test_module,
         hdl_toplevel=hdl_toplevel,
         hdl_toplevel_lang='verilog',
