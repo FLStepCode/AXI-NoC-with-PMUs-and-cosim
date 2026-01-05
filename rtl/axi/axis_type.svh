@@ -9,7 +9,7 @@ typedef struct packed {
 } axis_data_t;
 
 typedef struct packed {
-    axis_data_t axis_data;
+    axis_data_t data;
     logic TVALID;
 } axis_mosi_t;
 

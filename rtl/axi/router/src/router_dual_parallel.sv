@@ -32,68 +32,68 @@ module router_dual_parallel #(
     parameter MAXIMUM_PACKAGES_NUMBER_WIDTH
     = $clog2(MAXIMUM_PACKAGES_NUMBER - 1)
 )(
-    input clk, rst_n,
-    input  axis_data_t in  [CHANNEL_NUMBER],
-    input  logic  in_valid  [CHANNEL_NUMBER],
-    output logic  in_ready  [CHANNEL_NUMBER],
-    output axis_data_t out [CHANNEL_NUMBER],
-    output logic  out_valid [CHANNEL_NUMBER],
-    input  logic  out_ready [CHANNEL_NUMBER]
+    input clk_i, rst_n_i,
+    input  axis_mosi_t in_mosi_i  [CHANNEL_NUMBER],
+    output axis_miso_t in_miso_o  [CHANNEL_NUMBER],
+    output axis_mosi_t out_mosi_o [CHANNEL_NUMBER],
+    input  axis_miso_t out_miso_i [CHANNEL_NUMBER]
 );
 
     `include "axis_type.svh"
 
-    axis_data_t queue_out [CHANNEL_NUMBER],
-    arbiter_out_req, arbiter_out_resp,
-    arb_req_axis [CHANNEL_NUMBER/2],
-    arb_resp_axis [CHANNEL_NUMBER/2],
-    alg_req_axis [CHANNEL_NUMBER/2],
-    alg_resp_axis [CHANNEL_NUMBER/2];
+    axis_mosi_t queue_o_mosi [CHANNEL_NUMBER];
+    axis_miso_t queue_o_miso [CHANNEL_NUMBER];
 
-    logic queue_out_ready [CHANNEL_NUMBER];
-    logic queue_out_valid [CHANNEL_NUMBER];
+    axis_mosi_t arb_req_axis_i_mosi [CHANNEL_NUMBER/2];
+    axis_miso_t arb_req_axis_i_miso [CHANNEL_NUMBER/2];
 
-    logic arbiter_out_ready;
-    logic arbiter_out_valid;
+    axis_mosi_t arb_resp_axis_i_mosi [CHANNEL_NUMBER/2];
+    axis_miso_t arb_resp_axis_i_miso [CHANNEL_NUMBER/2];
 
-    logic arb_req_axis_ready [CHANNEL_NUMBER/2],
-    logic arb_req_axis_valid [CHANNEL_NUMBER/2],
+    axis_mosi_t arbiter_o_req_mosi, arbiter_o_resp_mosi;
+    axis_miso_t arbiter_o_req_miso, arbiter_o_resp_miso;
 
-    logic arb_resp_axis_ready [CHANNEL_NUMBER/2],
-    logic arb_resp_axis_valid [CHANNEL_NUMBER/2],
+    axis_mosi_t alg_req_axis_o_mosi [CHANNEL_NUMBER/2];
+    axis_miso_t alg_req_axis_o_miso [CHANNEL_NUMBER/2];
 
-    logic alg_req_axis_ready [CHANNEL_NUMBER/2],
-    logic alg_req_axis_valid [CHANNEL_NUMBER/2],
-
-    logic alg_resp_axis_ready [CHANNEL_NUMBER/2];
-    logic alg_resp_axis_valid [CHANNEL_NUMBER/2];
+    axis_mosi_t alg_resp_axis_o_mosi [CHANNEL_NUMBER/2];
+    axis_miso_t alg_resp_axis_o_miso [CHANNEL_NUMBER/2];
     
     logic [$clog2(CHANNEL_NUMBER/2)-1:0] current_grant_req, current_grant_resp;
     logic [MAX_ROUTERS_X_WIDTH-1:0] target_x_req, target_x_resp;
     logic [MAX_ROUTERS_Y_WIDTH-1:0] target_y_req, target_y_resp;
+    
+    stream_fifo #(
+        .DATA_WIDTH($bits(data_i)),
+        .FIFO_LEN(BUFFER_LENGTH)
+    ) q (
+        .ACLK(clk_i),
+        .ARESETn(rst_n_i),
+
+        .in_mosi_i(in_mosi_i),
+        .in_miso_o(in_miso_o),
+        .out_mosi_o(queue_o_mosi),
+        .out_miso_i(queue_o_miso)
+    );
 
     generate
         genvar i;
         for (i = 0; i < CHANNEL_NUMBER/2; i++) begin : interfaces_concat
-            assign arb_req_axis_valid[i] = queue_out_valid[i*2];
-            assign queue_out_ready[i*2]  = arb_req_axis_ready[i];
-            assign arb_req_axis[i]       = queue_out[i*2];
+            assign arb_req_axis_i_mosi[i] = queue_o_mosi[i*2];
+            assign queue_o_miso[i*2] = arb_req_axis_i_miso[i];
 
-            
-            assign arb_resp_axis_valid[i]   = queue_out_valid[i*2 + 1];
-            assign queue_out_ready[i*2 + 1] = arb_resp_axis_ready[i];
-            assign arb_resp_axis[i]         = queue_out[i*2 + 1];
+            assign arb_resp_axis_i_mosi[i] = queue_o_mosi[i*2+1];
+            assign queue_o_miso[i*2+1] = arb_resp_axis_i_miso[i];
 
-            assign out_valid[i*2]        = alg_req_axis_valid[i];
-            assign alg_req_axis_ready[i] = out_ready[i*2];
-            assign out[i*2]              = alg_req_axis[i];
+            assign out_mosi_o[i*2]   = alg_req_axis_o_mosi[i];
+            assign out_mosi_o[i*2+1] = alg_resp_axis_o_mosi[i];
 
-            assign out_valid[i*2 + 1]     = alg_resp_axis_valid[i];
-            assign alg_resp_axis_ready[i] = out_ready[i*2 + 1];
-            assign out[i*2 + 1]           = alg_resp_axis[i];
+            assign alg_req_axis_o_miso[i]  = out_miso_i[i*2];
+            assign alg_resp_axis_o_miso[i] =  out_miso_i[i*2+1];
         end
         
     endgenerate
+    
     arbiter #(
         .DATA_WIDTH(DATA_WIDTH),
         .ID_WIDTH(ID_WIDTH),
@@ -104,27 +104,27 @@ module router_dual_parallel #(
         .MAX_ROUTERS_Y(MAX_ROUTERS_Y),
         .MAXIMUM_PACKAGES_NUMBER(MAXIMUM_PACKAGES_NUMBER)
     ) arb_req (
-        .clk(clk), .rst_n(rst_n),
-        .in(arb_req_axis),
-        .in_ready(arb_req_axis_ready),
-        .in_valid(arb_req_axis_valid),
-        .out(arbiter_out_req),
-        .out_ready(arbiter_out_req_ready),
-        .out_valid(arbiter_out_req_valid),
-        .current_grant(current_grant_req),
-        .target_x(target_x_req),
-        .target_y(target_y_req)
+        .clk_i(clk_i), .rst_n_i(rst_n_i),
+
+        .in_mosi_i(arb_req_axis_i_mosi),
+        .in_miso_o(arb_req_axis_i_miso),
+
+        .out_mosi_o(arbiter_o_req_mosi),
+        .out_miso_i(arbiter_o_req_miso),
+
+        .target_x(target_x),
+        .target_y(target_y)
     ), arb_resp (
-        .clk(clk), .rst_n(rst_n),
-        .in(arb_resp_axis),
-        .in_ready(arb_resp_axis_ready),
-        .in_valid(arb_resp_axis_valid),
-        .out(arbiter_out_resp),
-        .out_ready(arbiter_out_resp_ready),
-        .out_valid(arbiter_out_resp_valid),
-        .current_grant(current_grant_resp),
-        .target_x(target_x_resp),
-        .target_y(target_y_resp)
+        .clk_i(clk_i), .rst_n_i(rst_n_i),
+
+        .in_mosi_i(arb_resp_axis_i_mosi),
+        .in_miso_o(arb_resp_axis_i_miso),
+
+        .out_mosi_o(arbiter_o_resp_mosi),
+        .out_miso_i(arbiter_o_resp_miso),
+
+        .target_x(target_x),
+        .target_y(target_y)
     );
 
     algorithm #(
@@ -138,53 +138,28 @@ module router_dual_parallel #(
         .ROUTER_X(ROUTER_X),
         .ROUTER_Y(ROUTER_Y)
     ) alg_req (
-        .clk(clk), .rst_n(rst_n),
-        .in(arbiter_out_req),
-        .in_ready(arbiter_out_req_ready),
-        .in_valid(arbiter_out_req_valid),
-        .out(alg_req_axis),
-        .out_ready(alg_req_axis_ready),
-        .out_valid(alg_req_axis_valid),
-        .target_x(target_x_req),
-        .target_y(target_y_req)
+        .clk_i(clk_i), .rst_n_i(rst_n_i),
+
+        .in_mosi_i(arbiter_o_req_mosi),
+        .in_miso_o(arbiter_o_req_miso),
+
+        .out_mosi_o(alg_req_axis_o_mosi),
+        .out_miso_i(alg_req_axis_o_miso),
+
+        .target_x(target_x),
+        .target_y(target_y)
     ), alg_resp (
-        .clk(clk), .rst_n(rst_n),
-        .in(arbiter_out_resp),
-        .in_ready(arbiter_out_resp_ready),
-        .in_valid(arbiter_out_resp_valid),
-        .out(alg_resp_axis),
-        .out_ready(alg_resp_axis_ready),
-        .out_valid(alg_resp_axis_valid),
-        .target_x(target_x_resp),
-        .target_y(target_y_resp)
+        .clk_i(clk_i), .rst_n_i(rst_n_i),
+
+        .in_mosi_i(arbiter_o_resp_mosi),
+        .in_miso_o(arbiter_o_resp_miso),
+
+        .out_mosi_o(alg_req_axis_o_mosi),
+        .out_miso_i(alg_req_axis_o_miso),
+
+        .target_x(target_x),
+        .target_y(target_y)
     );
-
-    generate
-        for(i = 0; i < CHANNEL_NUMBER; i++) begin : axis_if_gen
-
-            queue_datatype data_i, data_o;
-
-            assign data_i = in[i];
-            assign queue_out[i] = data_o;
-
-            stream_fifo #(
-                .DATA_WIDTH($bits(data_i)),
-                .FIFO_LEN(BUFFER_LENGTH)
-            ) q (
-                .ACLK(clk),
-                .ARESETn(rst_n),
-                
-                .data_i(data_i),
-                .valid_i(in_valid[i]),
-                .ready_o(in_ready[i]),
-                
-                .data_o(data_o),
-                .valid_o(queue_out_valid[i]),
-                .ready_i(queue_out_ready[i])
-            );
-
-        end
-    endgenerate
 
     
 endmodule

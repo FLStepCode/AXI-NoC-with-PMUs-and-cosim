@@ -32,28 +32,36 @@ module router #(
     parameter MAXIMUM_PACKAGES_NUMBER_WIDTH
     = $clog2(MAXIMUM_PACKAGES_NUMBER - 1)
 )(
-    input  clk, rst_n,
-    input  axi_packet_t in  [CHANNEL_NUMBER],
-    input  logic  in_valid  [CHANNEL_NUMBER],
-    output logic  in_ready  [CHANNEL_NUMBER],
-    output axi_packet_t out [CHANNEL_NUMBER],
-    output logic  out_valid [CHANNEL_NUMBER],
-    input  logic  out_ready [CHANNEL_NUMBER]
+    input  clk_i, rst_n_i,
+    input  axis_mosi_t in_mosi_i  [CHANNEL_NUMBER],
+    output axis_miso_t in_miso_o  [CHANNEL_NUMBER],
+    output axis_mosi_t out_mosi_o [CHANNEL_NUMBER],
+    input  axis_miso_t out_miso_i [CHANNEL_NUMBER]
 );
 
     `include "axis_type.svh"
 
-    axis_data_t queue_out [CHANNEL_NUMBER],
-    arbiter_out;
+    axis_mosi_t queue_o_mosi [CHANNEL_NUMBER];
+    axis_miso_t queue_o_miso [CHANNEL_NUMBER];
 
-    logic queue_out_ready [CHANNEL_NUMBER];
-    logic queue_out_valid [CHANNEL_NUMBER];
-
-    logic arbiter_out_ready;
-    logic arbiter_out_valid;
+    axis_mosi_t arbiter_o_mosi;
+    axis_miso_t arbiter_o_miso;
 
     logic [MAX_ROUTERS_X_WIDTH-1:0] target_x;
     logic [MAX_ROUTERS_Y_WIDTH-1:0] target_y;
+
+    stream_fifo #(
+        .DATA_WIDTH($bits(data_i)),
+        .FIFO_LEN(BUFFER_LENGTH)
+    ) q (
+        .ACLK(clk_i),
+        .ARESETn(rst_n_i),
+
+        .in_mosi_i(in_mosi_i),
+        .in_miso_o(in_miso_o),
+        .out_mosi_o(queue_o_mosi),
+        .out_miso_i(queue_o_miso)
+    );
 
     arbiter #(
         .DATA_WIDTH(DATA_WIDTH),
@@ -65,13 +73,14 @@ module router #(
         .MAX_ROUTERS_Y(MAX_ROUTERS_Y),
         .MAXIMUM_PACKAGES_NUMBER(MAXIMUM_PACKAGES_NUMBER)
     ) arb (
-        .clk(clk), .rst_n(rst_n),
-        .in(queue_out),
-        .in_ready(queue_out_ready),
-        .in_valid(queue_out_valid),
-        .out(arbiter_out),
-        .out_ready(arbiter_out_ready),
-        .out_valid(arbiter_out_valid),
+        .clk_i(clk_i), .rst_n_i(rst_n_i),
+
+        .in_mosi_i(queue_o_mosi),
+        .in_miso_o(queue_o_mosi),
+
+        .out_mosi_o(arbiter_o_miso),
+        .out_miso_i(arbiter_o_mosi),
+
         .target_x(target_x),
         .target_y(target_y)
     );
@@ -87,44 +96,17 @@ module router #(
         .ROUTER_X(ROUTER_X),
         .ROUTER_Y(ROUTER_Y)
     ) alg (
-        .clk(clk), .rst_n(rst_n),
-        .in(arbiter_out),
-        .in_ready(arbiter_out_ready),
-        .in_valid(arbiter_out_valid),
-        .out(out),
-        .out_ready(out_ready),
-        .out_valid(out_valid),
+        .clk_i(clk_i), .rst_n_i(rst_n_i),
+
+        .in_mosi_i(arbiter_o_mosi),
+        .in_miso_o(arbiter_o_miso),
+
+        .out_mosi_o(out_mosi_o),
+        .out_miso_i(arbiter_o_miso),
+
         .target_x(target_x),
         .target_y(target_y)
     );
-
-    generate
-        genvar i;
-        for(i = 0; i < CHANNEL_NUMBER; i++) begin : axis_if_gen
-
-            axis_data_t data_i, data_o;
-
-            assign data_i = in[i];
-            assign queue_out[i] = data_o;
-
-            stream_fifo #(
-                .DATA_WIDTH($bits(data_i)),
-                .FIFO_LEN(BUFFER_LENGTH)
-            ) q (
-                .ACLK(clk),
-                .ARESETn(rst_n),
-                
-                .data_i(data_i),
-                .valid_i(in_valid[i]),
-                .ready_o(in_ready[i]),
-                
-                .data_o(data_o),
-                .valid_o(queue_out_valid[i]),
-                .ready_i(queue_out_ready[i])
-            );
-
-        end
-    endgenerate
 
     
 endmodule

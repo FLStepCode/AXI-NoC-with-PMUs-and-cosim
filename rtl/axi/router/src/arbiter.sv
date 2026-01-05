@@ -16,19 +16,17 @@ module arbiter #(
     parameter MAXIMUM_PACKAGES_NUMBER_WIDTH
     = $clog2(MAXIMUM_PACKAGES_NUMBER - 1)
 ) (
-    input clk, rst_n,
+    input clk_i, rst_n_i,
 
-    input axi_packet_t in [CHANNEL_NUMBER],
-    input  logic  in_valid  [CHANNEL_NUMBER],
-    output logic  in_ready  [CHANNEL_NUMBER],
-    output axi_packet_t out,
-    output logic  out_valid,
-    input  logic  out_ready,
+    input  axis_mosi_t in_mosi_i [CHANNEL_NUMBER],
+    output axis_miso_t in_miso_o [CHANNEL_NUMBER],
+    output axis_mosi_t out_mosi_o,
+    input  axis_miso_t out_miso_i,
 
-    output logic [CHANNEL_NUMBER_WIDTH-1:0] current_grant,
+    output logic [CHANNEL_NUMBER_WIDTH-1:0] current_grant_o,
 
-    output logic [MAX_ROUTERS_X_WIDTH-1:0] target_x,
-    output logic [MAX_ROUTERS_Y_WIDTH-1:0] target_y
+    output logic [MAX_ROUTERS_X_WIDTH-1:0] target_x_o,
+    output logic [MAX_ROUTERS_Y_WIDTH-1:0] target_y_o
 );
 
     `include "axis_type.svh"
@@ -46,15 +44,15 @@ module arbiter #(
     
     axis_data_t data [CHANNEL_NUMBER];
 
-    assign target_x = (out_valid && (out.TID == ROUTING_HEADER)) ?
+    assign target_x_o = (out_valid && (out.TID == ROUTING_HEADER)) ?
                         out.TDATA[
                             MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH-1:
                             MAX_ROUTERS_X_WIDTH
-                        ] : target_x_reg[current_grant];
-    assign target_y = (out_valid && (out.TID == ROUTING_HEADER)) ?
+                        ] : target_x_reg[current_grant_o];
+    assign target_y_o = (out_valid && (out.TID == ROUTING_HEADER)) ?
                         out.TDATA[
                             MAX_ROUTERS_X_WIDTH-1:0
-                        ] : target_y_reg[current_grant];
+                        ] : target_y_reg[current_grant_o];
     
     generate
 	    genvar i;
@@ -64,11 +62,11 @@ module arbiter #(
         end
     endgenerate
 
-    assign shifted_valid_i = {valid_i, valid_i} >> current_grant;
+    assign shifted_valid_i = {valid_i, valid_i} >> current_grant_o;
 
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            current_grant <= '0;
+    always_ff @(posedge clk_i or negedge rst_n_i) begin
+        if (!rst_n_i) begin
+            current_grant_o <= '0;
             for (int i = 0; i < CHANNEL_NUMBER; i++) begin
                 packages_left[i] <= '0;
                 target_x_reg[i]  <= '0;
@@ -77,30 +75,30 @@ module arbiter #(
         end
         else begin
             if (out_valid && (out.TID == ROUTING_HEADER)) begin
-                packages_left[current_grant] <= out.TDATA[
+                packages_left[current_grant_o] <= out.TDATA[
                     (MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH) * 2
                     +8-1:
                     (MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH) * 2
                 ];
-                target_y_reg[current_grant] <= out.TDATA[
+                target_y_reg[current_grant_o] <= out.TDATA[
                     MAX_ROUTERS_X_WIDTH-1:0
                 ];
-                target_x_reg[current_grant] <= out.TDATA[
+                target_x_reg[current_grant_o] <= out.TDATA[
                     MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH-1:
                     MAX_ROUTERS_X_WIDTH
                 ];
             end
             else begin
-                packages_left[current_grant] <= packages_left[current_grant] - (out_ready & out_valid);
+                packages_left[current_grant_o] <= packages_left[current_grant_o] - (out_ready & out_valid);
             end
-            if (!out_ready || !out_valid || (packages_left[current_grant] == 1 && out_valid && out_ready)) begin
-                current_grant <= next_grant;
+            if (!out_ready || !out_valid || (packages_left[current_grant_o] == 1 && out_valid && out_ready)) begin
+                current_grant_o <= next_grant;
             end
         end
     end
 
     always_comb begin
-        next_grant = current_grant;
+        next_grant = current_grant_o;
         increment = 0;
         for (int i = CHANNEL_NUMBER-1; i > 0; i--) begin
             if (shifted_valid_i[i]) begin
@@ -113,8 +111,8 @@ module arbiter #(
         (next_grant + increment);
     end
 
-    assign out = in[current_grant];
-    assign out_valid = in_valid[current_grant];
-    assign in_ready[current_grant] = out_ready;
+    assign out = in[current_grant_o];
+    assign out_valid = in_valid[current_grant_o];
+    assign in_ready[current_grant_o] = out_ready;
     
 endmodule
