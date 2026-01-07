@@ -57,9 +57,10 @@ module algorithm #(
         end
     end
 
-    assign in_miso_o.data = out_miso_i[ctrl].data;
-    assign in_miso_o.TREADY = out_miso_i[ctrl].TREADY;
-    assign out_mosi_o[ctrl] = in_mosi_i;
+    always_comb begin
+        in_miso_o = out_miso_i[ctrl];
+        out_mosi_o[ctrl] = in_mosi_i;
+    end
 
     always_ff @(posedge clk_i or negedge rst_n_i) begin
         if(!rst_n_i) begin
@@ -73,8 +74,8 @@ module algorithm #(
         busy_next = busy;
         if (in_mosi_i.TVALID) begin
             if (in_mosi_i.data.TID == ROUTING_HEADER) begin
-                busy_next[ctrl] = in_filtered_ready ? 1'b1 : busy[ctrl];
-            end else if (in_mosi_i.data.TLAST && out_miso_i.TREADY) begin
+                busy_next[ctrl] = out_miso_i[ctrl].TREADY ? 1'b1 : busy[ctrl];
+            end else if (in_mosi_i.data.TLAST && out_miso_i[ctrl].TREADY) begin
                 busy_next[ctrl] = 1'b0;
             end
         end

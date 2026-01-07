@@ -5,10 +5,13 @@ module stream_fifo #(
     input logic ACLK,
     input logic ARESETn,
     
-    input  axis_mosi_t in_mosi_i,
-    output axis_miso_t in_miso_o,
-    output axis_mosi_t out_mosi_o,
-    input  axis_miso_t out_miso_i
+    input logic [DATA_WIDTH-1:0] data_i,
+    input logic valid_i,
+    output logic ready_o,
+
+    output logic [DATA_WIDTH-1:0]  data_o,
+    output logic valid_o,
+    input logic ready_i
     
 );
     localparam ADDR_WIDTH = $clog2(FIFO_LEN);
@@ -20,8 +23,8 @@ module stream_fifo #(
 
     assign data_o = fifo_mem[read_ptr];
 
-    assign out_mosi_o.TVALID = (count > 0);
-    assign out_miso_i.TREADY = !(count == FIFO_LEN);
+    assign valid_o = (count > 0);
+    assign ready_o = !(count == FIFO_LEN);
 
     always_ff @(posedge ACLK or negedge ARESETn) begin
         if (!ARESETn) begin
@@ -30,35 +33,35 @@ module stream_fifo #(
             count <= 0;
         end
         else begin
-            if (in_mosi_i.TVALID && out_miso_i.TREADY) begin
+            if (valid_i && ready_o) begin
                 write_ptr <= (write_ptr == (FIFO_LEN - 1)) ? 0 : write_ptr + 1;
             end
-            if (out_mosi_o.TVALID && in_miso_o.TREADY) begin
+            if (valid_o && ready_i) begin
                 read_ptr <= (read_ptr == (FIFO_LEN - 1)) ? 0 : read_ptr + 1;
             end
 
-            if (in_mosi_i.TVALID && out_miso_i.TREADY && !(out_mosi_o.TVALID && in_miso_o.TREADY)) begin
+            if (valid_i && ready_o && !(valid_o && ready_i)) begin
                 count <= count + 1;
             end
-            else if (!(in_mosi_i.TVALID && out_miso_i.TREADY) && (out_mosi_o.TVALID && in_miso_o.TREADY)) begin
+            else if (!(valid_i && ready_o) && (valid_o && ready_i)) begin
                 count <= count - 1;
             end
         end
     end
 
     always @(posedge ACLK) begin
-        if (in_mosi_i.TVALID && out_miso_i.TREADY) begin
+        if (valid_i && ready_o) begin
             fifo_mem[write_ptr] <= data_i;
         end
     end
     /*
     logic write_handshake;
 
-    assign out_miso_i.TREADY = !((count != 0) & (read_ptr_reg == write_ptr));
-	assign out_mosi_o.TVALID = (count > 0);
+    assign ready_o = !((count != 0) & (read_ptr_reg == write_ptr));
+	assign valid_o = (count > 0);
 
     always @(posedge ACLK) begin
-        if (in_mosi_i.TVALID && out_miso_i.TREADY) begin
+        if (valid_i && ready_o) begin
             fifo_mem[write_ptr] <= data_i;
         end
     end
@@ -74,18 +77,18 @@ module stream_fifo #(
             write_handshake <= 0;
         end
         else begin
-            if (in_mosi_i.TVALID && out_miso_i.TREADY) begin
+            if (valid_i && ready_o) begin
                 write_ptr <= (write_ptr == (FIFO_LEN - 1)) ? 0 : write_ptr + 1;
             end
 
             read_ptr_reg <= read_ptr;
-            write_handshake <= in_mosi_i.TVALID & out_miso_i.TREADY;
+            write_handshake <= valid_i & ready_o;
         end
     end
 
     always_comb begin
         read_ptr = read_ptr_reg;
-        if (out_mosi_o.TVALID && in_miso_o.TREADY) begin
+        if (valid_o && ready_i) begin
             read_ptr = (read_ptr_reg == (FIFO_LEN - 1)) ? 0 : read_ptr_reg + 1;
         end
     end
@@ -96,11 +99,11 @@ module stream_fifo #(
         end
         else begin
 				
-            if (write_handshake && !(out_mosi_o.TVALID && in_miso_o.TREADY)) begin
+            if (write_handshake && !(valid_o && ready_i)) begin
                 count <= count + 1;
             end
 
-            if (!write_handshake && (out_mosi_o.TVALID && in_miso_o.TREADY)) begin
+            if (!write_handshake && (valid_o && ready_i)) begin
                 count <= count - 1;
             end
         end

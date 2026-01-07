@@ -31,7 +31,7 @@ module queue #(
 
     always_ff @(posedge clk_i) begin
         out_mosi_o.data <= stored_axis_r;
-        in_miso_o.TVALID <= yes_data;
+        out_mosi_o.TVALID <= yes_data;
     end
 
     always_ff @(posedge clk_i or negedge rst_n_i)

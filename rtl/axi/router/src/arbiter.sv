@@ -44,21 +44,20 @@ module arbiter #(
     
     axis_data_t data [CHANNEL_NUMBER];
 
-    assign target_x_o = (out_valid && (out.TID == ROUTING_HEADER)) ?
-                        out.TDATA[
+    assign target_x_o = (out_mosi_o.TVALID && (out_mosi_o.data.TID == ROUTING_HEADER)) ?
+                        out_mosi_o.data.TDATA[
                             MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH-1:
                             MAX_ROUTERS_X_WIDTH
                         ] : target_x_reg[current_grant_o];
-    assign target_y_o = (out_valid && (out.TID == ROUTING_HEADER)) ?
-                        out.TDATA[
+    assign target_y_o = (out_mosi_o.TVALID && (out_mosi_o.data.TID == ROUTING_HEADER)) ?
+                        out_mosi_o.data.TDATA[
                             MAX_ROUTERS_X_WIDTH-1:0
                         ] : target_y_reg[current_grant_o];
     
     generate
 	    genvar i;
         for (i = 0; i < CHANNEL_NUMBER; i++) begin : valid_gen
-            assign valid_i[i] = in_valid[i];
-            assign data[i] = in[i];
+            assign out_mosi_o[i] = in_mosi_i[i];
         end
     endgenerate
 
@@ -74,24 +73,24 @@ module arbiter #(
             end
         end
         else begin
-            if (out_valid && (out.TID == ROUTING_HEADER)) begin
-                packages_left[current_grant_o] <= out.TDATA[
+            if (out_mosi_o.TVALID && (out_mosi_o.data.TID == ROUTING_HEADER)) begin
+                packages_left[current_grant_o] <= out_mosi_o.data.TDATA[
                     (MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH) * 2
                     +8-1:
                     (MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH) * 2
                 ];
-                target_y_reg[current_grant_o] <= out.TDATA[
+                target_y_reg[current_grant_o] <= out_mosi_o.data.TDATA[
                     MAX_ROUTERS_X_WIDTH-1:0
                 ];
-                target_x_reg[current_grant_o] <= out.TDATA[
+                target_x_reg[current_grant_o] <= out_mosi_o.data.TDATA[
                     MAX_ROUTERS_X_WIDTH+MAX_ROUTERS_Y_WIDTH-1:
                     MAX_ROUTERS_X_WIDTH
                 ];
             end
             else begin
-                packages_left[current_grant_o] <= packages_left[current_grant_o] - (out_ready & out_valid);
+                packages_left[current_grant_o] <= packages_left[current_grant_o] - (in_miso_o[current_grant_o].TREADY & out_mosi_o.TVALID);
             end
-            if (!out_ready || !out_valid || (packages_left[current_grant_o] == 1 && out_valid && out_ready)) begin
+            if (!in_miso_o[current_grant_o].TREADY || !out_mosi_o.TVALID || (packages_left[current_grant_o] == 1 && out_mosi_o.TVALID && in_miso_o[current_grant_o].TREADY)) begin
                 current_grant_o <= next_grant;
             end
         end
@@ -111,8 +110,9 @@ module arbiter #(
         (next_grant + increment);
     end
 
-    assign out = in[current_grant_o];
-    assign out_valid = in_valid[current_grant_o];
-    assign in_ready[current_grant_o] = out_ready;
+    always_comb begin
+        out_mosi_o = in_mosi_i[current_grant_o];
+        in_miso_o[current_grant_o] = out_miso_i;
+    end
     
 endmodule

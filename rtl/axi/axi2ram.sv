@@ -3,7 +3,12 @@ module axi2ram
     parameter ID_W_WIDTH = 4,
     parameter ID_R_WIDTH = 4,
     parameter ADDR_WIDTH = 16,
+
     parameter DATA_WIDTH = 32,
+    parameter ID_WIDTH = 4,
+    parameter DEST_WIDTH = 4,
+    parameter USER_WIDTH = 4,
+    
     parameter BYTE_WIDTH = 8,
     parameter BATCH_WIDTH = DATA_WIDTH/BYTE_WIDTH
 )
@@ -25,8 +30,8 @@ module axi2ram
     input  logic [DATA_WIDTH-1:0] data_b,
 
     //AXI
-    input  axis_mosi_t in_mosi_i,
-    output axis_miso_t in_miso_o
+    input  axi_mosi_t in_mosi_i,
+    output axi_miso_t in_miso_o
 
 );
 
@@ -70,8 +75,8 @@ module axi2ram
         in_miso_o.data.r.RLAST = 1'b0;
         in_miso_o.data.r.RID = ARID;
 
-        addr_a = r_state == RESPONDING ? (ARBURST == 2'b01) ? ARADDR + r_ready : 
-                    (ARBURST == 2'b10) ? (ARADDR + r_ready > 2**ADDR_WIDTH-1 ? '0 : ARADDR + r_ready) : ARADDR
+        addr_a = r_state == RESPONDING ? (ARBURST == 2'b01) ? ARADDR + in_mosi_i.RREADY : 
+                    (ARBURST == 2'b10) ? (ARADDR + in_mosi_i.RREADY > 2**ADDR_WIDTH-1 ? '0 : ARADDR + in_mosi_i.RREADY) : ARADDR
                     : ARADDR;
         byte_en_a = '0;
         write_a = '0;
@@ -82,7 +87,7 @@ module axi2ram
             READING_ADDRESS: begin
                 r_state_next = READING_ADDRESS;
                 in_miso_o.ARREADY = 1'b1;
-                if(in_miso_o.ARVALID)
+                if(in_mosi_i.ARVALID)
                     r_state_next = REQUESTING_DATA;
             end
             REQUESTING_DATA:
@@ -92,7 +97,7 @@ module axi2ram
                 in_miso_o.RVALID = 1'b1;
                 if(ARLEN == 8'o0) begin
                     in_miso_o.data.r.RLAST = 1'b1;
-                    if(r_ready)
+                    if(in_mosi_i.RREADY)
                         r_state_next = READING_ADDRESS;
                 end
             end
@@ -133,7 +138,7 @@ module axi2ram
             RESPONDING: begin
                 w_state_next = RESPONDING;
                 in_miso_o.BVALID = 1'b1;
-                if(b_ready)
+                if(in_mosi_i.BREADY)
                     w_state_next = READING_ADDRESS;
             end
             default:;
@@ -167,7 +172,7 @@ module axi2ram
             REQUESTING_DATA: begin
             end
             RESPONDING: begin
-                if(r_ready) begin
+                if(in_mosi_i.RREADY) begin
                     ARLEN <= (ARLEN == 0) ? '0 : ARLEN - 1'b1;
 
                     case (ARBURST)

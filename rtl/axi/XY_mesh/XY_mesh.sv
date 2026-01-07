@@ -1,9 +1,26 @@
+`include "defines.svh"
+
 module XY_mesh #(
     parameter ADDR_WIDTH = 16,
     parameter DATA_WIDTH = 32,
     parameter ID_W_WIDTH = 4,
     parameter ID_R_WIDTH = 4,
     parameter MAX_ID_WIDTH = 4,
+    `ifdef TID_PRESENT
+    parameter ID_WIDTH = 4,
+    `else
+    parameter ID_WIDTH = 0,
+    `endif
+    `ifdef TDEST_PRESENT
+    parameter DEST_WIDTH = 4,
+    `else
+    parameter DEST_WIDTH = 0,
+    `endif
+    `ifdef TUSER_PRESENT
+    parameter USER_WIDTH = 4,
+    `else
+    parameter USER_WIDTH = 0,
+    `endif
 
     parameter MAX_ROUTERS_X = 3,
     parameter MAX_ROUTERS_Y = 3,
@@ -34,27 +51,27 @@ module XY_mesh #(
     axis_miso_t router_if_miso[MAX_ROUTERS_Y+2][MAX_ROUTERS_X+2][5];
     axis_mosi_t router_if_mosi[MAX_ROUTERS_Y+2][MAX_ROUTERS_X+2][5];
 
-    axis_miso_t from_home_miso[MAX_ROUTERS_Y+2][MAX_ROUTERS_X+2][5];
-    axis_mosi_t from_home_mosi[MAX_ROUTERS_Y+2][MAX_ROUTERS_X+2][5];
+    axis_miso_t from_home_miso[MAX_ROUTERS_Y+2][MAX_ROUTERS_X+2];
+    axis_mosi_t from_home_mosi[MAX_ROUTERS_Y+2][MAX_ROUTERS_X+2];
 
     generate
         genvar i;
         genvar j;
 
         for (i = 0; i < MAX_ROUTERS_Y; i++) begin : zeroing_Y
-            assign router_if[i][0][WEST].TVALID = '0;
-            assign router_if[i][MAX_ROUTERS_X+1][EAST].TVALID = '0;
+            assign router_if_mosi[i][0][WEST].TVALID = '0;
+            assign router_if_mosi[i][MAX_ROUTERS_X+1][EAST].TVALID = '0;
 
-            assign router_if[i][0][WEST].TREADY = '1;
-            assign router_if[i][MAX_ROUTERS_X+1][EAST].TREADY = '1;
+            assign router_if_miso[i][0][WEST].TREADY = '1;
+            assign router_if_miso[i][MAX_ROUTERS_X+1][EAST].TREADY = '1;
         end
 
         for (i = 0; i < MAX_ROUTERS_X; i++) begin : zeroing_X
-            assign router_if[0][i][NORTH].TVALID = '0;
-            assign router_if[MAX_ROUTERS_Y+1][i][SOUTH].TVALID = '0;
+            assign router_if_mosi[0][i][NORTH].TVALID = '0;
+            assign router_if_mosi[MAX_ROUTERS_Y+1][i][SOUTH].TVALID = '0;
 
-            assign router_if[0][i][NORTH].TREADY = '1;
-            assign router_if[MAX_ROUTERS_Y+1][i][SOUTH].TREADY = '1;
+            assign router_if_miso[0][i][NORTH].TREADY = '1;
+            assign router_if_miso[MAX_ROUTERS_Y+1][i][SOUTH].TREADY = '1;
         end
     endgenerate
 
@@ -69,6 +86,10 @@ module XY_mesh #(
                     .ID_R_WIDTH(ID_R_WIDTH),
                     .MAX_ID_WIDTH(MAX_ID_WIDTH),
 
+                    .ID_WIDTH(ID_WIDTH),
+                    .DEST_WIDTH(DEST_WIDTH),
+                    .USER_WIDTH(USER_WIDTH),
+
                     .ROUTER_X(j),
                     .MAX_ROUTERS_X(MAX_ROUTERS_X),
                     .ROUTER_Y(i),
@@ -82,13 +103,16 @@ module XY_mesh #(
 
                     .s_axi_i(s_axi_i[i * MAX_ROUTERS_X + j]),
                     .s_axi_o(s_axi_o[i * MAX_ROUTERS_X + j]),
-                    .s_axis_i(router_if_mosi[i+1][j+1][HOME]),
-                    .s_axis_o(router_if_miso[i+1][j+1][HOME]),
 
-                    .m_axi_i(m_axi_o[i * MAX_ROUTERS_X + j]),
+                    .s_axis_req_i(router_if_mosi[i+1][j+1][HOME]),
+                    .s_axis_req_o(router_if_miso[i+1][j+1][HOME]),
+
+
+                    .m_axi_i(m_axi_i[i * MAX_ROUTERS_X + j]),
                     .m_axi_o(m_axi_o[i * MAX_ROUTERS_X + j]),
-                    .m_axis_i(from_home_miso[i+1][j+1]),
-                    .m_axis_o(from_home_mosi[i+1][j+1])
+
+                    .m_axis_req_i(from_home_miso[i+1][j+1]),
+                    .m_axis_req_o(from_home_mosi[i+1][j+1])
                 );
 
                 router #(
@@ -96,7 +120,11 @@ module XY_mesh #(
                     .ROUTER_X(j),
                     .MAX_ROUTERS_X(MAX_ROUTERS_X),
                     .ROUTER_Y(i),
-                    .MAX_ROUTERS_Y(MAX_ROUTERS_Y)
+                    .MAX_ROUTERS_Y(MAX_ROUTERS_Y),
+
+                    .ID_WIDTH(ID_WIDTH),
+                    .DEST_WIDTH(DEST_WIDTH),
+                    .USER_WIDTH(USER_WIDTH)
                 ) router (
                     .clk(ACLK),
                     .rst_n(ARESETn),

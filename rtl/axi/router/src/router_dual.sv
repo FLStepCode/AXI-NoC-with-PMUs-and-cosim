@@ -53,9 +53,13 @@ module router_dual #(
     logic [MAX_ROUTERS_X_WIDTH-1:0] target_x;
     logic [MAX_ROUTERS_Y_WIDTH-1:0] target_y;
 
-    stream_fifo #(
-        .DATA_WIDTH($bits(data_i)),
-        .FIFO_LEN(BUFFER_LENGTH)
+    axi_fifo_buffer #(
+        .CHANNEL_NUMBER(CHANNEL_NUMBER),
+        .FIFO_LEN(BUFFER_LENGTH),
+        .DATA_WIDTH(DATA_WIDTH),
+        .ID_WIDTH(ID_WIDTH),
+        .DEST_WIDTH(DEST_WIDTH),
+        .USER_WIDTH(USER_WIDTH)
     ) q (
         .ACLK(clk_i),
         .ARESETn(rst_n_i),
@@ -84,8 +88,8 @@ module router_dual #(
         .out_mosi_o(arbiter_o_miso),
         .out_miso_i(arbiter_o_mosi),
 
-        .target_x(target_x),
-        .target_y(target_y)
+        .target_x_o(target_x),
+        .target_y_o(target_y)
     );
 
     algorithm_dual #(
@@ -107,8 +111,8 @@ module router_dual #(
         .out_mosi_o(out_mosi_o),
         .out_miso_i(arbiter_o_miso),
 
-        .target_x(target_x),
-        .target_y(target_y)
+        .target_x_i(target_x),
+        .target_y_i(target_y)
     );
     
 endmodule

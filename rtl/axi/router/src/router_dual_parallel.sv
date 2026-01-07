@@ -62,10 +62,14 @@ module router_dual_parallel #(
     logic [$clog2(CHANNEL_NUMBER/2)-1:0] current_grant_req, current_grant_resp;
     logic [MAX_ROUTERS_X_WIDTH-1:0] target_x_req, target_x_resp;
     logic [MAX_ROUTERS_Y_WIDTH-1:0] target_y_req, target_y_resp;
-    
-    stream_fifo #(
-        .DATA_WIDTH($bits(data_i)),
-        .FIFO_LEN(BUFFER_LENGTH)
+
+    axi_fifo_buffer #(
+        .CHANNEL_NUMBER(CHANNEL_NUMBER),
+        .FIFO_LEN(BUFFER_LENGTH),
+        .DATA_WIDTH(DATA_WIDTH),
+        .ID_WIDTH(ID_WIDTH),
+        .DEST_WIDTH(DEST_WIDTH),
+        .USER_WIDTH(USER_WIDTH)
     ) q (
         .ACLK(clk_i),
         .ARESETn(rst_n_i),
@@ -112,8 +116,8 @@ module router_dual_parallel #(
         .out_mosi_o(arbiter_o_req_mosi),
         .out_miso_i(arbiter_o_req_miso),
 
-        .target_x(target_x),
-        .target_y(target_y)
+        .target_x_o(target_x_req),
+        .target_y_o(target_y_req)
     ), arb_resp (
         .clk_i(clk_i), .rst_n_i(rst_n_i),
 
@@ -123,8 +127,8 @@ module router_dual_parallel #(
         .out_mosi_o(arbiter_o_resp_mosi),
         .out_miso_i(arbiter_o_resp_miso),
 
-        .target_x(target_x),
-        .target_y(target_y)
+        .target_x_o(target_x_resp),
+        .target_y_o(target_y_resp)
     );
 
     algorithm #(
@@ -146,8 +150,8 @@ module router_dual_parallel #(
         .out_mosi_o(alg_req_axis_o_mosi),
         .out_miso_i(alg_req_axis_o_miso),
 
-        .target_x(target_x),
-        .target_y(target_y)
+        .target_x(target_x_req),
+        .target_y(target_y_req)
     ), alg_resp (
         .clk_i(clk_i), .rst_n_i(rst_n_i),
 
@@ -157,8 +161,8 @@ module router_dual_parallel #(
         .out_mosi_o(alg_req_axis_o_mosi),
         .out_miso_i(alg_req_axis_o_miso),
 
-        .target_x(target_x),
-        .target_y(target_y)
+        .target_x(target_x_resp),
+        .target_y(target_y_resp)
     );
 
     
