@@ -55,7 +55,7 @@ module router_dual #(
 
     axi_fifo_buffer #(
         .CHANNEL_NUMBER(CHANNEL_NUMBER),
-        .FIFO_LEN(BUFFER_LENGTH),
+        .BUFFER_LENGTH(BUFFER_LENGTH),
         .DATA_WIDTH(DATA_WIDTH),
         .ID_WIDTH(ID_WIDTH),
         .DEST_WIDTH(DEST_WIDTH),
@@ -83,10 +83,10 @@ module router_dual #(
         .clk_i(clk_i), .rst_n_i(rst_n_i),
 
         .in_mosi_i(queue_o_mosi),
-        .in_miso_o(queue_o_mosi),
+        .in_miso_o(queue_o_miso),
 
-        .out_mosi_o(arbiter_o_miso),
-        .out_miso_i(arbiter_o_mosi),
+        .out_mosi_o(arbiter_o_mosi),
+        .out_miso_i(arbiter_o_miso),
 
         .target_x_o(target_x),
         .target_y_o(target_y)
@@ -109,7 +109,7 @@ module router_dual #(
         .in_miso_o(arbiter_o_miso),
 
         .out_mosi_o(out_mosi_o),
-        .out_miso_i(arbiter_o_miso),
+        .out_miso_i(out_miso_i),
 
         .target_x_i(target_x),
         .target_y_i(target_y)

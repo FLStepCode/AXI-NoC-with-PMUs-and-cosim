@@ -65,7 +65,7 @@ module router_dual_parallel #(
 
     axi_fifo_buffer #(
         .CHANNEL_NUMBER(CHANNEL_NUMBER),
-        .FIFO_LEN(BUFFER_LENGTH),
+        .BUFFER_LENGTH(BUFFER_LENGTH),
         .DATA_WIDTH(DATA_WIDTH),
         .ID_WIDTH(ID_WIDTH),
         .DEST_WIDTH(DEST_WIDTH),
@@ -90,14 +90,13 @@ module router_dual_parallel #(
             assign queue_o_miso[i*2+1] = arb_resp_axis_i_miso[i];
 
             assign out_mosi_o[i*2]   = alg_req_axis_o_mosi[i];
-            assign out_mosi_o[i*2+1] = alg_resp_axis_o_mosi[i];
-
             assign alg_req_axis_o_miso[i]  = out_miso_i[i*2];
+
+            assign out_mosi_o[i*2+1] = alg_resp_axis_o_mosi[i];
             assign alg_resp_axis_o_miso[i] =  out_miso_i[i*2+1];
         end
-        
     endgenerate
-    
+
     arbiter #(
         .DATA_WIDTH(DATA_WIDTH),
         .ID_WIDTH(ID_WIDTH),
@@ -150,19 +149,19 @@ module router_dual_parallel #(
         .out_mosi_o(alg_req_axis_o_mosi),
         .out_miso_i(alg_req_axis_o_miso),
 
-        .target_x(target_x_req),
-        .target_y(target_y_req)
+        .target_x_i(target_x_req),
+        .target_y_i(target_y_req)
     ), alg_resp (
         .clk_i(clk_i), .rst_n_i(rst_n_i),
 
         .in_mosi_i(arbiter_o_resp_mosi),
         .in_miso_o(arbiter_o_resp_miso),
 
-        .out_mosi_o(alg_req_axis_o_mosi),
-        .out_miso_i(alg_req_axis_o_miso),
+        .out_mosi_o(alg_resp_axis_o_mosi),
+        .out_miso_i(alg_resp_axis_o_miso),
 
-        .target_x(target_x_resp),
-        .target_y(target_y_resp)
+        .target_x_i(target_x_resp),
+        .target_y_i(target_y_resp)
     );
 
     

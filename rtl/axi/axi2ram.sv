@@ -2,7 +2,7 @@ module axi2ram
 #(
     parameter ID_W_WIDTH = 4,
     parameter ID_R_WIDTH = 4,
-    parameter ADDR_WIDTH = 16,
+    parameter ADDR_WIDTH = 4,
 
     parameter DATA_WIDTH = 32,
     parameter ID_WIDTH = 4,
@@ -13,7 +13,7 @@ module axi2ram
     parameter BATCH_WIDTH = DATA_WIDTH/BYTE_WIDTH
 )
 (
-	input clk_in, rst_n_i,
+	input clk_i, rst_n_i,
 
     // Port a 
     output logic [ADDR_WIDTH-1:0] addr_a,
@@ -57,7 +57,7 @@ module axi2ram
     logic [2:0] AWSIZE;
     logic [1:0] AWBURST;
 
-    always_ff @( posedge clk_in or negedge rst_n_i ) begin : StateSwitchBlock
+    always_ff @( posedge clk_i or negedge rst_n_i ) begin : StateSwitchBlock
         if(!rst_n_i) begin            
             r_state <= READING_ADDRESS;
             w_state <= READING_ADDRESS;
@@ -146,7 +146,7 @@ module axi2ram
 
     end : FSMOutputBlock
 
-    always_ff @( posedge clk_in or negedge rst_n_i ) begin : LogicBlock
+    always_ff @( posedge clk_i or negedge rst_n_i ) begin : LogicBlock
     if(!rst_n_i) begin
         ARID <= '0;
         ARADDR <= '0;

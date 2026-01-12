@@ -11,7 +11,7 @@ module axi_ram
 
     parameter BYTE_WIDTH = 8
 ) (
-	input logic clk_in, rst_n,
+	input logic clk_i, rst_n_i,
     
     input  axi_mosi_t in_mosi_i,
     output axi_miso_t in_miso_o
@@ -22,15 +22,15 @@ module axi_ram
 
     localparam WSRTB_W = DATA_WIDTH/BYTE_WIDTH;
 
-    logic [ADDR_WIDTH-1:0] addr_a [DATA_WIDTH/BYTE_WIDTH];
-    logic [BYTE_WIDTH-1:0] data_a [DATA_WIDTH/BYTE_WIDTH];
-    logic [BYTE_WIDTH-1:0] write_a [DATA_WIDTH/BYTE_WIDTH];
-    logic [DATA_WIDTH/BYTE_WIDTH-1:0] write_en_a;
+    logic [ADDR_WIDTH-1:0] addr_a;
+    logic [BYTE_WIDTH*WSRTB_W-1:0] data_a;
+    logic [BYTE_WIDTH*WSRTB_W-1:0] write_a;
+    logic [WSRTB_W-1:0] write_en_a;
     
-    logic [ADDR_WIDTH-1:0] addr_b [DATA_WIDTH/BYTE_WIDTH];
-    logic [BYTE_WIDTH-1:0] data_b [DATA_WIDTH/BYTE_WIDTH];
-    logic [BYTE_WIDTH-1:0] write_b [DATA_WIDTH/BYTE_WIDTH];
-    logic [DATA_WIDTH/BYTE_WIDTH-1:0] write_en_b;
+    logic [ADDR_WIDTH-1:0] addr_b;
+    logic [BYTE_WIDTH*WSRTB_W-1:0] data_b;
+    logic [BYTE_WIDTH*WSRTB_W-1:0] write_b;
+    logic [WSRTB_W-1:0] write_en_b;
 
     axi2ram #(
         .ID_W_WIDTH(ID_W_WIDTH),
@@ -43,7 +43,7 @@ module axi_ram
         .USER_WIDTH(USER_WIDTH)
     
         ) axi (
-        .clk_in(clk_in), .rst_n(rst_n),
+        .clk_i(clk_i), .rst_n_i(rst_n_i),
 
         .addr_a(addr_a),
         .data_a(data_a),
@@ -65,7 +65,7 @@ module axi_ram
         .BYTE_WIDTH(BYTE_WIDTH),
         .BATCH_WIDTH(WSRTB_W)
     ) coupled_ram (
-        .clk_a(clk_in), .clk_b(clk_in),
+        .clk_i(clk_i),
 
         .addr_a(addr_a),
         .data_a(data_a),

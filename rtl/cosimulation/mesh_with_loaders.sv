@@ -95,15 +95,16 @@ module mesh_with_loaders # (
     generate
         for (i = 0; i < 16; i++) begin : map_rams
             axi_ram #(
-                .DATA_WIDTH(8),
-                .ADDR_WIDTH(8),
+                .DATA_WIDTH(32),
+                .BYTE_WIDTH(8),
+                .ADDR_WIDTH(12),
                 .ID_W_WIDTH(5),
                 .ID_R_WIDTH(5)
             ) ram (
-                .clk(aclk),
-                .rst_n(aresetn),
-                .s_axi_i(axi_mosi_ram[i]),
-                .s_axi_o(axi_miso_ram[i])
+                .clk_i(aclk),
+                .rst_n_i(aresetn),
+                .in_mosi_i(axi_mosi_ram[i]),
+                .in_miso_o(axi_miso_ram[i])
             );
         end
 

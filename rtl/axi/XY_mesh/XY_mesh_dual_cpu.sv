@@ -34,11 +34,13 @@ module XY_mesh_dual_cpu #(
 
     `include "axi_type.svh"
 
-    axi_mosi_t s_axi_i[16];
-    axi_miso_t s_axi_o[16];
+    localparam CPUS_NUMBER = MAX_ROUTERS_X*MAX_ROUTERS_Y;
 
-    axi_miso_t m_axi_i[16];
-    axi_mosi_t m_axi_o[16];
+    axi_mosi_t s_axi_i[CPUS_NUMBER];
+    axi_miso_t s_axi_o[CPUS_NUMBER];
+
+    axi_miso_t m_axi_i[CPUS_NUMBER];
+    axi_mosi_t m_axi_o[CPUS_NUMBER];
 
     sr_cpu_axi #(
         .ADDR_WIDTH(ADDR_WIDTH),
@@ -49,9 +51,9 @@ module XY_mesh_dual_cpu #(
         .ID_WIDTH(ID_WIDTH),
         .DEST_WIDTH(DEST_WIDTH),
         .USER_WIDTH(USER_WIDTH)
-    ) cpu[16] (
-        .clk   ({16{clk}}),  
-        .rst_n ({16{rst_n}}),
+    ) cpu[CPUS_NUMBER] (
+        .clk   ({CPUS_NUMBER{clk}}),  
+        .rst_n ({CPUS_NUMBER{rst_n}}),
 
         .in_miso_i(m_axi_i),
         .in_mosi_o(m_axi_o)
@@ -62,13 +64,12 @@ module XY_mesh_dual_cpu #(
         .DATA_WIDTH(DATA_WIDTH),
         .ID_W_WIDTH(ID_W_WIDTH),
         .ID_R_WIDTH(ID_R_WIDTH),
-        .MAX_ID_WIDTH(MAX_ID_WIDTH),
         .ID_WIDTH(ID_WIDTH),
         .DEST_WIDTH(DEST_WIDTH),
         .USER_WIDTH(USER_WIDTH)
-    ) ram[16] (
-        .clk   ({16{clk}}),
-        .rst_n ({16{rst_n}}),
+    ) ram[CPUS_NUMBER] (
+        .clk   ({CPUS_NUMBER{clk}}),
+        .rst_n ({CPUS_NUMBER{rst_n}}),
 
         .in_mosi_i(s_axi_i),
         .in_miso_o(s_axi_o)
@@ -79,7 +80,6 @@ module XY_mesh_dual_cpu #(
     .DATA_WIDTH(DATA_WIDTH),
     .ID_W_WIDTH(ID_W_WIDTH),
     .ID_R_WIDTH(ID_R_WIDTH),
-    .MAX_ID_WIDTH(MAX_ID_WIDTH),
     .ID_WIDTH(ID_WIDTH),
     .DEST_WIDTH(DEST_WIDTH),
     .USER_WIDTH(USER_WIDTH),

@@ -148,8 +148,8 @@ module XY_mesh_dual #(
                     .s_axis_req_i(router_if_mosi[i+1][j+1][HOME_REQ]),
                     .s_axis_req_o(router_if_miso[i+1][j+1][HOME_REQ]),
 
-                    .s_axis_req_i(router_if_mosi[i+1][j+1][HOME_RESP]),
-                    .s_axis_req_o(router_if_miso[i+1][j+1][HOME_RESP]),
+                    .s_axis_resp_i(router_if_mosi[i+1][j+1][HOME_RESP]),
+                    .s_axis_resp_o(router_if_miso[i+1][j+1][HOME_RESP]),
 
 
                     .m_axi_i(m_axi_i[i * MAX_ROUTERS_X + j]),
@@ -163,76 +163,39 @@ module XY_mesh_dual #(
 
                 );
 
+                assign router_i_mosi[i][j][0] = from_home_mosi[i][j][HOME_REQ];
+                assign from_home_miso[i][j][HOME_REQ] = router_i_miso[i][j][0];
 
-                assign router_i_mosi[i][j][0].TVALID =                  from_home_mosi[i][j][HOME_REQ].TVALID;
-                assign from_home_miso[i][j][HOME_REQ].TREADY = router_i_miso[i][j][0].TREADY;
-                assign router_i_mosi[i][j][0].data.TDATA =                   from_home_mosi[i][j][HOME_REQ].data.TDATA;
-                assign router_i_mosi[i][j][0].data.TID =                     from_home_mosi[i][j][HOME_REQ].data.TID;
-                assign router_i_mosi[i][j][0].data.TSTRB =                   from_home_mosi[i][j][HOME_REQ].data.TSTRB;
-                assign router_i_mosi[i][j][0].data.TLAST =                   from_home_mosi[i][j][HOME_REQ].data.TLAST;
+                assign router_i_mosi[i][j][1] = from_home_mosi[i][j][HOME_RESP];
+                assign from_home_miso[i][j][HOME_RESP] = router_i_miso[i][j][1];
 
-                assign router_i_mosi[i][j][1].TVALID =                  from_home_mosi[i][j][HOME_RESP].TVALID;
-                assign from_home_miso[i][j][HOME_RESP].TREADY = router_i_miso[i][j][1].TREADY;
-                assign router_i_mosi[i][j][1].data.TDATA =                   from_home_mosi[i][j][HOME_RESP].data.TDATA;
-                assign router_i_mosi[i][j][1].data.TID =                     from_home_mosi[i][j][HOME_RESP].data.TID;
-                assign router_i_mosi[i][j][1].data.TSTRB =                   from_home_mosi[i][j][HOME_RESP].data.TSTRB;
-                assign router_i_mosi[i][j][1].data.TLAST =                   from_home_mosi[i][j][HOME_RESP].data.TLAST;
 
-                assign router_i_mosi[i][j][2].TVALID =                  router_if_mosi[i][j+1][SOUTH_REQ].TVALID;
-                assign router_if_miso[i][j+1][SOUTH_REQ].TREADY = router_i_miso[i][j][2].TREADY;
-                assign router_i_mosi[i][j][2].data.TDATA =                   router_if_mosi[i][j+1][SOUTH_REQ].data.TDATA;
-                assign router_i_mosi[i][j][2].data.TID =                     router_if_mosi[i][j+1][SOUTH_REQ].data.TID;
-                assign router_i_mosi[i][j][2].data.TSTRB =                   router_if_mosi[i][j+1][SOUTH_REQ].data.TSTRB;
-                assign router_i_mosi[i][j][2].data.TLAST =                   router_if_mosi[i][j+1][SOUTH_REQ].data.TLAST;
+                assign router_i_mosi[i][j][2] = router_if_mosi[i][j+1][SOUTH_REQ];
+                assign router_if_miso[i][j+1][SOUTH_REQ] = router_i_miso[i][j][2];
 
-                assign router_i_mosi[i][j][3].TVALID =                  router_if_mosi[i][j+1][SOUTH_RESP].TVALID;
-                assign router_if_miso[i][j+1][SOUTH_RESP].TREADY = router_i_miso[i][j][3].TREADY;
-                assign router_i_mosi[i][j][3].data.TDATA =                   router_if_mosi[i][j+1][SOUTH_RESP].data.TDATA;
-                assign router_i_mosi[i][j][3].data.TID =                     router_if_mosi[i][j+1][SOUTH_RESP].data.TID;
-                assign router_i_mosi[i][j][3].data.TSTRB =                   router_if_mosi[i][j+1][SOUTH_RESP].data.TSTRB;
-                assign router_i_mosi[i][j][3].data.TLAST =                   router_if_mosi[i][j+1][SOUTH_RESP].data.TLAST;
+                assign router_i_mosi[i][j][3] = router_if_mosi[i][j+1][SOUTH_RESP];
+                assign router_if_miso[i][j+1][SOUTH_RESP] = router_i_miso[i][j][3];
 
-                assign router_i_mosi[i][j][4].TVALID =                  router_if_mosi[i+1][j+2][WEST_REQ].TVALID;
-                assign router_if_miso[i+1][j+2][WEST_REQ].TREADY = router_i_miso[i][j][4].TREADY;
-                assign router_i_mosi[i][j][4].data.TDATA =                   router_if_mosi[i+1][j+2][WEST_REQ].data.TDATA;
-                assign router_i_mosi[i][j][4].data.TID =                     router_if_mosi[i+1][j+2][WEST_REQ].data.TID;
-                assign router_i_mosi[i][j][4].data.TSTRB =                   router_if_mosi[i+1][j+2][WEST_REQ].data.TSTRB;
-                assign router_i_mosi[i][j][4].data.TLAST =                   router_if_mosi[i+1][j+2][WEST_REQ].data.TLAST;
 
-                assign router_i_mosi[i][j][5].TVALID =                  router_if_mosi[i+1][j+2][WEST_RESP].TVALID;
-                assign router_if_miso[i+1][j+2][WEST_RESP].TREADY = router_i_miso[i][j][5].TREADY;
-                assign router_i_mosi[i][j][5].data.TDATA =                   router_if_mosi[i+1][j+2][WEST_RESP].data.TDATA;
-                assign router_i_mosi[i][j][5].data.TID =                     router_if_mosi[i+1][j+2][WEST_RESP].data.TID;
-                assign router_i_mosi[i][j][5].data.TSTRB =                   router_if_mosi[i+1][j+2][WEST_RESP].data.TSTRB;
-                assign router_i_mosi[i][j][5].data.TLAST =                   router_if_mosi[i+1][j+2][WEST_RESP].data.TLAST;
+                assign router_i_mosi[i][j][4] = router_if_mosi[i+1][j+2][WEST_REQ];
+                assign router_if_miso[i+1][j+2][WEST_REQ] = router_i_miso[i][j][4];
+                
+                assign router_i_mosi[i][j][5] = router_if_mosi[i+1][j+2][WEST_RESP];
+                assign router_if_miso[i+1][j+2][WEST_RESP] = router_i_miso[i][j][5];
 
-                assign router_i_mosi[i][j][6].TVALID =                  router_if_mosi[i+2][j+1][NORTH_REQ].TVALID;
-                assign router_if_miso[i+2][j+1][NORTH_REQ].TREADY = router_i_miso[i][j][6].TREADY;
-                assign router_i_mosi[i][j][6].data.TDATA =                   router_if_mosi[i+2][j+1][NORTH_REQ].data.TDATA;
-                assign router_i_mosi[i][j][6].data.TID =                     router_if_mosi[i+2][j+1][NORTH_REQ].data.TID;
-                assign router_i_mosi[i][j][6].data.TSTRB =                   router_if_mosi[i+2][j+1][NORTH_REQ].data.TSTRB;
-                assign router_i_mosi[i][j][6].data.TLAST =                   router_if_mosi[i+2][j+1][NORTH_REQ].data.TLAST;
 
-                assign router_i_mosi[i][j][7].TVALID =                  router_if_mosi[i+2][j+1][NORTH_RESP].TVALID;
-                assign router_if_miso[i+2][j+1][NORTH_RESP].TREADY = router_i_miso[i][j][7].TREADY;
-                assign router_i_mosi[i][j][7].data.TDATA =                   router_if_mosi[i+2][j+1][NORTH_RESP].data.TDATA;
-                assign router_i_mosi[i][j][7].data.TID =                     router_if_mosi[i+2][j+1][NORTH_RESP].data.TID;
-                assign router_i_mosi[i][j][7].data.TSTRB =                   router_if_mosi[i+2][j+1][NORTH_RESP].data.TSTRB;
-                assign router_i_mosi[i][j][7].data.TLAST =                   router_if_mosi[i+2][j+1][NORTH_RESP].data.TLAST;
+                assign router_i_mosi[i][j][6] = router_if_mosi[i+2][j+1][NORTH_REQ];
+                assign router_if_miso[i+2][j+1][NORTH_REQ] = router_i_miso[i][j][6];
 
-                assign router_i_mosi[i][j][8].TVALID =                  router_if_mosi[i+1][j][EAST_REQ].TVALID;
-                assign router_if_miso[i+1][j][EAST_REQ].TREADY = router_i_miso[i][j][8].TREADY;
-                assign router_i_mosi[i][j][8].data.TDATA =                   router_if_mosi[i+1][j][EAST_REQ].data.TDATA;
-                assign router_i_mosi[i][j][8].data.TID =                     router_if_mosi[i+1][j][EAST_REQ].data.TID;
-                assign router_i_mosi[i][j][8].data.TSTRB =                   router_if_mosi[i+1][j][EAST_REQ].data.TSTRB;
-                assign router_i_mosi[i][j][8].data.TLAST =                   router_if_mosi[i+1][j][EAST_REQ].data.TLAST;
+                assign router_i_mosi[i][j][7] = router_if_mosi[i+2][j+1][NORTH_RESP];
+                assign router_if_miso[i+2][j+1][NORTH_RESP] = router_i_miso[i][j][7];
 
-                assign router_i_mosi[i][j][9].TVALID =                  router_if_mosi[i+1][j][EAST_RESP].TVALID;
-                assign router_if_miso[i+1][j][EAST_RESP].TREADY = router_i_miso[i][j][9].TREADY;
-                assign router_i_mosi[i][j][9].data.TDATA =                   router_if_mosi[i+1][j][EAST_RESP].data.TDATA;
-                assign router_i_mosi[i][j][9].data.TID =                     router_if_mosi[i+1][j][EAST_RESP].data.TID;
-                assign router_i_mosi[i][j][9].data.TSTRB =                   router_if_mosi[i+1][j][EAST_RESP].data.TSTRB;
-                assign router_i_mosi[i][j][9].data.TLAST =                   router_if_mosi[i+1][j][EAST_RESP].data.TLAST;
+
+                assign router_i_mosi[i][j][8] = router_if_mosi[i+1][j][EAST_REQ];
+                assign router_if_miso[i+1][j][EAST_REQ] = router_i_miso[i][j][8];
+
+                assign router_i_mosi[i][j][9] = router_if_mosi[i+1][j][EAST_RESP];
+                assign router_if_miso[i+1][j][EAST_RESP] = router_i_miso[i][j][9];
                 
                 router_dual #(
                     .DATA_WIDTH(AXIS_CHANNEL_WIDTH),
@@ -246,8 +209,8 @@ module XY_mesh_dual #(
                     .USER_WIDTH(USER_WIDTH)
 
                 ) router (
-                    .clk(ACLK),
-                    .rst_n(ARESETn),
+                    .clk_i(ACLK),
+                    .rst_n_i(ARESETn),
 
                     .in_mosi_i(router_i_mosi[i][j]),
                     .in_miso_o(router_i_miso[i][j]),
