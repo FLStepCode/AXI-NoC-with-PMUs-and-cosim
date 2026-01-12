@@ -1,4 +1,4 @@
-module algorithm_selector_o #(
+module algorithm_selector_XY #(
     parameter MAX_ROUTERS_X = 4,
     parameter MAX_ROUTERS_X_WIDTH
     = $clog2(MAX_ROUTERS_X),

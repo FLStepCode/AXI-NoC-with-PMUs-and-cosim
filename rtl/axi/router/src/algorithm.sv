@@ -36,7 +36,7 @@ module algorithm #(
     logic [CHANNEL_NUMBER-1:0] busy;
     logic [CHANNEL_NUMBER-1:0] busy_next;
 
-    algorithm_selector #(
+    algorithm_selector_XY #(
        .MAX_ROUTERS_X(MAX_ROUTERS_X), 
        .MAX_ROUTERS_Y(MAX_ROUTERS_Y), 
        .ROUTER_X(ROUTER_X),
@@ -45,7 +45,7 @@ module algorithm #(
     ) algorithm_selector (
         .target_x_i(target_x_i),
         .target_y_i(target_y_i),
-        .selector(selector)
+        .selector_o(selector)
     );
 
     always_comb begin
@@ -58,6 +58,9 @@ module algorithm #(
     end
 
     always_comb begin
+        for (int i = 0; i < CHANNEL_NUMBER; i++) begin
+            out_mosi_o[i] = '0;
+        end
         in_miso_o = out_miso_i[ctrl];
         out_mosi_o[ctrl] = in_mosi_i;
     end

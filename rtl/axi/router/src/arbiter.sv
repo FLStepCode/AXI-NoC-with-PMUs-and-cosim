@@ -57,7 +57,7 @@ module arbiter #(
     generate
 	    genvar i;
         for (i = 0; i < CHANNEL_NUMBER; i++) begin : valid_gen
-            assign out_mosi_o[i] = in_mosi_i[i];
+            assign valid_i[i] = in_mosi_i[i].TVALID;
         end
     endgenerate
 
@@ -111,6 +111,9 @@ module arbiter #(
     end
 
     always_comb begin
+        for (int i = 0; i < CHANNEL_NUMBER; i++) begin
+            in_miso_o[i] = '0;
+        end
         out_mosi_o = in_mosi_i[current_grant_o];
         in_miso_o[current_grant_o] = out_miso_i;
     end

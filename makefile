@@ -31,6 +31,8 @@ SIM_ARGS ?= -suppress 12110 -autofindloop -suppress 12130
 
 COCOTB_TEST_MODULES ?= tb_example
 
+TOPLEVEL ?= toplevel
+
 .PHONY: all test clean run_pytest run_quartus
 all: test
 
@@ -53,7 +55,7 @@ run_pytest: $(VENV_DIR)
 	python3 -m pytest --junit-xml=${RESULTS_DIR}/all.xml
 
 run_quartus:
-	make -f $(CURDIR)/build_system/quartus/makefile
+	make -f $(CURDIR)/build_system/quartus/makefile TOPLEVEL=$(TOPLEVEL)
 
 $(VENV_DIR) : $(CURDIR)/requirements.txt
 	python3 -m venv $(VENV_DIR)

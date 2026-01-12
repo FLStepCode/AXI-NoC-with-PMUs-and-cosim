@@ -63,7 +63,10 @@ module algorithm_dual #(
     end
 
     always_comb begin
-        in_miso_o[ctrl] = out_miso_i;
+        for (int i = 0; i < CHANNEL_NUMBER; i++) begin
+            out_mosi_o[i] = '0;
+        end
+        in_miso_o = out_miso_i[ctrl];
         out_mosi_o[ctrl] = in_mosi_i;
     end
 

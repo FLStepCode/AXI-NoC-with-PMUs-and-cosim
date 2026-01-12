@@ -84,7 +84,6 @@ module XY_mesh #(
                     .DATA_WIDTH(DATA_WIDTH),
                     .ID_W_WIDTH(ID_W_WIDTH),
                     .ID_R_WIDTH(ID_R_WIDTH),
-                    .MAX_ID_WIDTH(MAX_ID_WIDTH),
 
                     .ID_WIDTH(ID_WIDTH),
                     .DEST_WIDTH(DEST_WIDTH),
@@ -93,10 +92,7 @@ module XY_mesh #(
                     .ROUTER_X(j),
                     .MAX_ROUTERS_X(MAX_ROUTERS_X),
                     .ROUTER_Y(i),
-                    .MAX_ROUTERS_Y(MAX_ROUTERS_Y),
-
-                    .Ax_FIFO_LEN(Ax_FIFO_LEN),
-                    .W_FIFO_LEN(W_FIFO_LEN)
+                    .MAX_ROUTERS_Y(MAX_ROUTERS_Y)
                 ) bridge (
                     .ACLK(ACLK),
                     .ARESETn(ARESETn),
@@ -126,8 +122,8 @@ module XY_mesh #(
                     .DEST_WIDTH(DEST_WIDTH),
                     .USER_WIDTH(USER_WIDTH)
                 ) router (
-                    .clk(ACLK),
-                    .rst_n(ARESETn),
+                    .clk_i(ACLK),
+                    .rst_n_i(ARESETn),
 
                     .in_mosi_i('{from_home_mosi[i+1][j+1], router_if_mosi[i][j+1][SOUTH], router_if_mosi[i+1][j+2][WEST], router_if_mosi[i+2][j+1][NORTH], router_if_mosi[i+1][j][EAST]}),
                     .in_miso_o('{from_home_miso[i+1][j+1], router_if_miso[i][j+1][SOUTH], router_if_miso[i+1][j+2][WEST], router_if_miso[i+2][j+1][NORTH], router_if_miso[i+1][j][EAST]}),
