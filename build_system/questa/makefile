@@ -5,7 +5,7 @@ QUESTA_PATH ?= $(CURDIR)/build_system/questa
 QUESTA_BUILD_PATH ?= $(CURDIR)/.cache/build_system/questa
 TOPLEVEL ?= tb
 
-SIM_PATH ?= $(QUESTA_BUILD_PATH)/$(SIM_PATH)
+SIM_PATH ?= $(QUESTA_BUILD_PATH)
 
 VARS_TCL_PATH := $(SIM_PATH)/vars.tcl
 
