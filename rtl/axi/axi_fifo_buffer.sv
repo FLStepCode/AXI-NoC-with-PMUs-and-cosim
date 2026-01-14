@@ -1,10 +1,21 @@
+`include "defines.svh"
+
 module axi_fifo_buffer #(
     parameter CHANNEL_NUMBER = 8,
     parameter BUFFER_LENGTH = 8,
-    parameter DATA_WIDTH = 32,
-    parameter ID_WIDTH = 4,
-    parameter DEST_WIDTH = 4,
+    parameter DATA_WIDTH = 32
+    `ifdef TID_PRESENT
+    ,
+    parameter ID_WIDTH = 4
+    `endif
+    `ifdef TDEST_PRESENT
+    ,
+    parameter DEST_WIDTH = 4
+    `endif
+    `ifdef TUSER_PRESENT
+    ,
     parameter USER_WIDTH = 4
+    `endif
 ) (
     input  ACLK, ARESETn,
     input  axis_mosi_t in_mosi_i  [CHANNEL_NUMBER],

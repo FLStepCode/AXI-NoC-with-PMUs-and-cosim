@@ -4,22 +4,19 @@ module axi_master_loader #(
     parameter DATA_WIDTH   = 32,
     parameter ADDR_WIDTH   = 16,
     parameter ID_W_WIDTH   = 5,
-    parameter ID_R_WIDTH   = 5,
+    parameter ID_R_WIDTH   = 5
     `ifdef TID_PRESENT
-    parameter ID_WIDTH = 4,
-    `else
-    parameter ID_WIDTH = 0,
+    ,
+    parameter ID_WIDTH = 4
     `endif
     `ifdef TDEST_PRESENT
-    parameter DEST_WIDTH = 4,
-    `else
-    parameter DEST_WIDTH = 0,
+    ,
+    parameter DEST_WIDTH = 4
     `endif
     `ifdef TUSER_PRESENT
-    parameter USER_WIDTH = 4,
-    `else
-    parameter USER_WIDTH = 0,
-    `endif
+    ,
+    parameter USER_WIDTH = 4
+    `endif,
     parameter FIFO_DEPTH   = 32,
     parameter LOADER_ID    = 0,
 

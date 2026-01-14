@@ -1,20 +1,19 @@
+`include "defines.svh"
+
 module router_dual_parallel #(
-    parameter DATA_WIDTH = 32,
+    parameter DATA_WIDTH = 32
     `ifdef TID_PRESENT
-    parameter ID_WIDTH = 4,
-    `else
-    parameter ID_WIDTH = 0,
+    ,
+    parameter ID_WIDTH = 4
     `endif
     `ifdef TDEST_PRESENT
-    parameter DEST_WIDTH = 4,
-    `else
-    parameter DEST_WIDTH = 0,
+    ,
+    parameter DEST_WIDTH = 4
     `endif
     `ifdef TUSER_PRESENT
-    parameter USER_WIDTH = 4,
-    `else
-    parameter USER_WIDTH = 0,
-    `endif
+    ,
+    parameter USER_WIDTH = 4
+    `endif,
     parameter CHANNEL_NUMBER = 10,
     parameter CHANNEL_NUMBER_WIDTH
     = $clog2(CHANNEL_NUMBER),
@@ -66,10 +65,19 @@ module router_dual_parallel #(
     axi_fifo_buffer #(
         .CHANNEL_NUMBER(CHANNEL_NUMBER),
         .BUFFER_LENGTH(BUFFER_LENGTH),
-        .DATA_WIDTH(DATA_WIDTH),
-        .ID_WIDTH(ID_WIDTH),
-        .DEST_WIDTH(DEST_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+        `ifdef TID_PRESENT
+         ,
+        .ID_WIDTH(ID_WIDTH)
+        `endif
+        `ifdef TDEST_PRESENT
+         ,
+        .DEST_WIDTH(DEST_WIDTH)
+        `endif
+        `ifdef TUSER_PRESENT
+         ,
         .USER_WIDTH(USER_WIDTH)
+        `endif
     ) q (
         .ACLK(clk_i),
         .ARESETn(rst_n_i),
@@ -98,10 +106,19 @@ module router_dual_parallel #(
     endgenerate
 
     arbiter #(
-        .DATA_WIDTH(DATA_WIDTH),
-        .ID_WIDTH(ID_WIDTH),
-        .DEST_WIDTH(DEST_WIDTH),
-        .USER_WIDTH(USER_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+        `ifdef TID_PRESENT
+         ,
+        .ID_WIDTH(ID_WIDTH)
+        `endif
+        `ifdef TDEST_PRESENT
+         ,
+        .DEST_WIDTH(DEST_WIDTH)
+        `endif
+        `ifdef TUSER_PRESENT
+         ,
+        .USER_WIDTH(USER_WIDTH)
+        `endif,
         .CHANNEL_NUMBER(CHANNEL_NUMBER/2),
         .MAX_ROUTERS_X(MAX_ROUTERS_X),
         .MAX_ROUTERS_Y(MAX_ROUTERS_Y),
@@ -131,10 +148,19 @@ module router_dual_parallel #(
     );
 
     algorithm #(
-        .DATA_WIDTH(DATA_WIDTH),
-        .ID_WIDTH(ID_WIDTH),
-        .DEST_WIDTH(DEST_WIDTH),
-        .USER_WIDTH(USER_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+        `ifdef TID_PRESENT
+         ,
+        .ID_WIDTH(ID_WIDTH)
+        `endif
+        `ifdef TDEST_PRESENT
+         ,
+        .DEST_WIDTH(DEST_WIDTH)
+        `endif
+        `ifdef TUSER_PRESENT
+         ,
+        .USER_WIDTH(USER_WIDTH)
+        `endif,
         .CHANNEL_NUMBER(CHANNEL_NUMBER/2),
         .MAX_ROUTERS_X(MAX_ROUTERS_X),
         .MAX_ROUTERS_Y(MAX_ROUTERS_Y),

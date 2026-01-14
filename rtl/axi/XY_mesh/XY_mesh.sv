@@ -5,22 +5,19 @@ module XY_mesh #(
     parameter DATA_WIDTH = 32,
     parameter ID_W_WIDTH = 4,
     parameter ID_R_WIDTH = 4,
-    parameter MAX_ID_WIDTH = 4,
+    parameter MAX_ID_WIDTH = 4
     `ifdef TID_PRESENT
-    parameter ID_WIDTH = 4,
-    `else
-    parameter ID_WIDTH = 0,
+    ,
+    parameter ID_WIDTH = 4
     `endif
     `ifdef TDEST_PRESENT
-    parameter DEST_WIDTH = 4,
-    `else
-    parameter DEST_WIDTH = 0,
+    ,
+    parameter DEST_WIDTH = 4
     `endif
     `ifdef TUSER_PRESENT
-    parameter USER_WIDTH = 4,
-    `else
-    parameter USER_WIDTH = 0,
-    `endif
+    ,
+    parameter USER_WIDTH = 4
+    `endif,
 
     parameter MAX_ROUTERS_X = 3,
     parameter MAX_ROUTERS_Y = 3,
@@ -83,11 +80,20 @@ module XY_mesh #(
                     .ADDR_WIDTH(ADDR_WIDTH),
                     .DATA_WIDTH(DATA_WIDTH),
                     .ID_W_WIDTH(ID_W_WIDTH),
-                    .ID_R_WIDTH(ID_R_WIDTH),
+                    .ID_R_WIDTH(ID_R_WIDTH)
 
-                    .ID_WIDTH(ID_WIDTH),
-                    .DEST_WIDTH(DEST_WIDTH),
-                    .USER_WIDTH(USER_WIDTH),
+                    `ifdef TID_PRESENT
+                    ,
+                    .ID_WIDTH(ID_WIDTH)
+                    `endif
+                    `ifdef TDEST_PRESENT
+                    ,
+                    .DEST_WIDTH(DEST_WIDTH)
+                    `endif
+                    `ifdef TUSER_PRESENT
+                    ,
+                    .USER_WIDTH(USER_WIDTH)
+                    `endif,
 
                     .ROUTER_X(j),
                     .MAX_ROUTERS_X(MAX_ROUTERS_X),
@@ -116,11 +122,20 @@ module XY_mesh #(
                     .ROUTER_X(j),
                     .MAX_ROUTERS_X(MAX_ROUTERS_X),
                     .ROUTER_Y(i),
-                    .MAX_ROUTERS_Y(MAX_ROUTERS_Y),
+                    .MAX_ROUTERS_Y(MAX_ROUTERS_Y)
 
-                    .ID_WIDTH(ID_WIDTH),
-                    .DEST_WIDTH(DEST_WIDTH),
+                    `ifdef TID_PRESENT
+                    ,
+                    .ID_WIDTH(ID_WIDTH)
+                    `endif
+                    `ifdef TDEST_PRESENT
+                    ,
+                    .DEST_WIDTH(DEST_WIDTH)
+                    `endif
+                    `ifdef TUSER_PRESENT
+                    ,
                     .USER_WIDTH(USER_WIDTH)
+                    `endif
                 ) router (
                     .clk_i(ACLK),
                     .rst_n_i(ARESETn),

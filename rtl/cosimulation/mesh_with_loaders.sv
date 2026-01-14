@@ -1,13 +1,24 @@
+`include "defines.svh"
+
 module mesh_with_loaders # (
     parameter ID_W_WIDTH = 5,
     parameter ID_R_WIDTH = 5,
     parameter MAX_ID_WIDTH = 4,
     parameter ADDR_WIDTH = 8,
 
-    parameter DATA_WIDTH = 8,
-    parameter ID_WIDTH = 4,
-    parameter DEST_WIDTH = 4,
+    parameter DATA_WIDTH = 8
+    `ifdef TID_PRESENT
+    ,
+    parameter ID_WIDTH = 4
+    `endif
+    `ifdef TDEST_PRESENT
+    ,
+    parameter DEST_WIDTH = 4
+    `endif
+    `ifdef TUSER_PRESENT
+    ,
     parameter USER_WIDTH = 4
+    `endif
 ) (
     input  logic        aclk,
     input  logic        aresetn,
@@ -41,10 +52,19 @@ module mesh_with_loaders # (
                 .DATA_WIDTH(DATA_WIDTH),
                 .ID_W_WIDTH(ID_W_WIDTH),
                 .ID_R_WIDTH(ID_R_WIDTH),
-                .MAX_ID_WIDTH(MAX_ID_WIDTH),
-                .ID_WIDTH(ID_WIDTH),
-                .DEST_WIDTH(DEST_WIDTH),
+                .MAX_ID_WIDTH(MAX_ID_WIDTH)
+                `ifdef TID_PRESENT
+                ,
+                .ID_WIDTH(ID_WIDTH)
+                `endif
+                `ifdef TDEST_PRESENT
+                ,
+                .DEST_WIDTH(DEST_WIDTH)
+                `endif
+                `ifdef TUSER_PRESENT
+                ,
                 .USER_WIDTH(USER_WIDTH)
+                `endif
             ) pmu (
                 .aclk    (aclk),
                 .aresetn (aresetn),
@@ -59,10 +79,19 @@ module mesh_with_loaders # (
                 .DATA_WIDTH(DATA_WIDTH),
                 .ID_W_WIDTH(ID_W_WIDTH),
                 .ID_R_WIDTH(ID_R_WIDTH),
-                .MAX_ID_WIDTH(MAX_ID_WIDTH),
-                .ID_WIDTH(ID_WIDTH),
-                .DEST_WIDTH(DEST_WIDTH),
+                .MAX_ID_WIDTH(MAX_ID_WIDTH)
+                `ifdef TID_PRESENT
+                ,
+                .ID_WIDTH(ID_WIDTH)
+                `endif
+                `ifdef TDEST_PRESENT
+                ,
+                .DEST_WIDTH(DEST_WIDTH)
+                `endif
+                `ifdef TUSER_PRESENT
+                ,
                 .USER_WIDTH(USER_WIDTH)
+                `endif
             ) loader (
                 .clk_i       (aclk),
                 .arstn_i     (aresetn),

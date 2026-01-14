@@ -3,9 +3,15 @@ typedef struct packed {
     logic [(DATA_WIDTH/8)-1:0] TSTRB;
     logic [(DATA_WIDTH/8)-1:0] TKEEP;
     logic TLAST;
+    `ifdef TID_PRESENT
     logic [ID_WIDTH-1:0] TID;
+    `endif
+    `ifdef TDEST_PRESENT
     logic [DEST_WIDTH-1:0] TDEST;
+    `endif
+    `ifdef TUSER_PRESENT
     logic [USER_WIDTH-1:0] TUSER;
+    `endif
 } axis_data_t;
 
 typedef struct packed {

@@ -1,13 +1,24 @@
+`include "defines.svh"
+
 module axi_ram 
 #(
     parameter ID_W_WIDTH = 4,
     parameter ID_R_WIDTH = 4,
     parameter ADDR_WIDTH = 16,
 
-    parameter DATA_WIDTH = 32,
-    parameter ID_WIDTH = 4,
-    parameter DEST_WIDTH = 4,
-    parameter USER_WIDTH = 4,
+    parameter DATA_WIDTH = 32
+    `ifdef TID_PRESENT
+    ,
+    parameter ID_WIDTH = 4
+    `endif
+    `ifdef TDEST_PRESENT
+    ,
+    parameter DEST_WIDTH = 4
+    `endif
+    `ifdef TUSER_PRESENT
+    ,
+    parameter USER_WIDTH = 4
+    `endif,
 
     parameter BYTE_WIDTH = 8
 ) (
@@ -37,10 +48,19 @@ module axi_ram
         .ID_R_WIDTH(ID_R_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH),
 
-        .DATA_WIDTH(DATA_WIDTH),
-        .ID_WIDTH(ID_WIDTH),
-        .DEST_WIDTH(DEST_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH)
+        `ifdef TID_PRESENT
+         ,
+        .ID_WIDTH(ID_WIDTH)
+        `endif
+        `ifdef TDEST_PRESENT
+         ,
+        .DEST_WIDTH(DEST_WIDTH)
+        `endif
+        `ifdef TUSER_PRESENT
+         ,
         .USER_WIDTH(USER_WIDTH)
+        `endif
     
         ) axi (
         .clk_i(clk_i), .rst_n_i(rst_n_i),

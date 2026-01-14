@@ -1,8 +1,19 @@
+`include "defines.svh"
+
 module algorithm_dual #(
-    parameter DATA_WIDTH = 32,
-    parameter ID_WIDTH = 4,
-    parameter DEST_WIDTH = 4,
-    parameter USER_WIDTH = 4,
+    parameter DATA_WIDTH = 32
+    `ifdef TID_PRESENT
+    ,
+    parameter ID_WIDTH = 4
+    `endif
+    `ifdef TDEST_PRESENT
+    ,
+    parameter DEST_WIDTH = 4
+    `endif
+    `ifdef TUSER_PRESENT
+    ,
+    parameter USER_WIDTH = 4
+    `endif,
     parameter CHANNEL_NUMBER = 10,
     parameter CHANNEL_NUMBER_WIDTH
     = $clog2(CHANNEL_NUMBER),
