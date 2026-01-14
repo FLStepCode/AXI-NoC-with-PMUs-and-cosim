@@ -11,8 +11,8 @@ module cosim_top #(
 );
 
     logic [4:0]              pmu_addr   [CORE_COUNT];
-    logic [63:0]             pmu_data   [CORE_COUNT];
-    logic [7:0]              req_depth              ;
+    logic [31:0]             pmu_data   [CORE_COUNT];
+    logic                    resp_wait  [CORE_COUNT];
     logic [AXI_ID_WIDTH-1:0] id         [CORE_COUNT];
     logic                    write      [CORE_COUNT];
     logic [7:0]              axlen      [CORE_COUNT];
@@ -27,7 +27,7 @@ module cosim_top #(
         .pmu_addr_i  (pmu_addr ),
         .pmu_data_o  (pmu_data ),
 
-        .req_depth_i (req_depth),
+        .resp_wait_i (resp_wait),
         .id_i        (id       ),
         .write_i     (write    ),
         .axlen_i     (axlen    ),
@@ -50,7 +50,7 @@ module cosim_top #(
         .pmu_addr_o   (pmu_addr ),
         .pmu_data_i   (pmu_data ),
 
-        .req_depth_o  (req_depth),
+        .resp_wait_o  (resp_wait),
         .id_o         (id       ),
         .write_o      (write    ),
         .axlen_o      (axlen    ),

@@ -9,8 +9,8 @@ import random
 async def test(dut):
     cocotb.start_soon(Clock(dut.clk_i, 20, 'ns').start())
 
-    source = UartSource(dut.rx_i, baud=115_200, bits=8)
-    sink = UartSink(dut.tx_o, baud=115_200, bits=8)
+    source = UartSource(dut.rx_i, baud=10_000_000, bits=8)
+    sink = UartSink(dut.tx_o, baud=10_000_000, bits=8)
 
     dut.arstn_i.value = 0
     await RisingEdge(dut.clk_i)
@@ -21,21 +21,12 @@ async def test(dut):
     await source.write(int.to_bytes(32, 1, 'little'))
     await source.wait()
 
-    for i in range(50000):
-        await RisingEdge(dut.clk_i)
-
-    await source.write(int.to_bytes(2, 1, 'little'))
-    await source.wait()
-    await source.write(int.to_bytes(32, 1, 'little'))
-    await source.wait()
-
-    for i in range(50000):
-        await RisingEdge(dut.clk_i)
+    await sink.read()
 
     for i in range(32):
         dest = random.randint(1, 16)
 
-        await source.write(int.to_bytes(4, 1, 'little'))
+        await source.write(int.to_bytes(3, 1, 'little'))
         await source.wait()
         await source.write(int.to_bytes(2, 1, 'little'))
         await source.wait()
@@ -43,8 +34,10 @@ async def test(dut):
         await source.wait()
         await source.write(int.to_bytes(3, 1, 'little'))
         await source.wait()
+        await source.write(int.to_bytes(0, 1, 'little'))
+        await source.wait()
 
-        await source.write(int.to_bytes(3, 1, 'little'))
+        await source.write(int.to_bytes(2, 1, 'little'))
         await source.wait()
         await source.write(int.to_bytes(2, 1, 'little'))
         await source.wait()
@@ -52,33 +45,27 @@ async def test(dut):
         await source.wait()
         await source.write(int.to_bytes(1, 1, 'little'))
         await source.wait()
-
-    await source.write(int.to_bytes(6, 1, 'little'))
-    await source.wait()
+        await source.write(int.to_bytes(0, 1, 'little'))
+        await source.wait()
 
     await source.write(int.to_bytes(5, 1, 'little'))
     await source.wait()
 
-    for i in range(100000):
-        await RisingEdge(dut.clk_i)
+    idle = 0
+    while idle != 0xFFFF:
+        await source.write(int.to_bytes(4, 1, 'little'))
+        await source.wait()
 
-    await source.write(int.to_bytes(7, 1, 'little'))
-    await source.wait()
-    await source.write(int.to_bytes(3, 1, 'little'))
-    await source.wait()
-    await source.write(int.to_bytes(1, 1, 'little'))
-    await source.wait()
-
-    for i in range(500000):
-        await RisingEdge(dut.clk_i)
+        idle = int.from_bytes(await sink.read(), 'little')
+        idle += (int.from_bytes(await sink.read(), 'little') << 8)
 
     for i in range(19):
-        await source.write(int.to_bytes(7, 1, 'little'))
+        await source.write(int.to_bytes(6, 1, 'little'))
         await source.wait()
         await source.write(int.to_bytes(2, 1, 'little'))
         await source.wait()
         await source.write(int.to_bytes(i, 1, 'little'))
         await source.wait()
 
-        for i in range(500000):
-            await RisingEdge(dut.clk_i)
+        for i in range(4):
+            await sink.read()

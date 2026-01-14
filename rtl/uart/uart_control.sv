@@ -13,9 +13,9 @@ module uart_control #(
     output logic                    tx_o,
 
     output logic [4:0]              pmu_addr_o   [CORE_COUNT],
-    input  logic [63:0]             pmu_data_i   [CORE_COUNT],
+    input  logic [31:0]             pmu_data_i   [CORE_COUNT],
 
-    output logic [7:0]              req_depth_o,
+    output logic                    resp_wait_o  [CORE_COUNT],
     output logic [AXI_ID_WIDTH-1:0] id_o         [CORE_COUNT],
     output logic                    write_o      [CORE_COUNT],
     output logic [7:0]              axlen_o      [CORE_COUNT],
@@ -27,13 +27,12 @@ module uart_control #(
     typedef enum logic [3:0] {
         IDLE,
         TEST,             // rx_i <- 0x01;  rx_i <- any number;                         tx_o -> rx_i + 1.
-        SET_REQ_DEPTH,    // rx_i <- 0x02;  rx_i <- request depth;
-        CREATE_AXI_READ,  // rx_i <- 0x03;  rx_i <- core ID (LSB to MSB);               rx_i <- AXI_ID_BYTES transactions; rx_i <- AXLEN; 
-        CREATE_AXI_WRITE, // rx_i <- 0x04;  rx_i <- core ID (LSB to MSB);               rx_i <- AXI_ID_BYTES transactions; rx_i <- AXLEN;
-        READ_IDLE_STATUS, // rx_i <- 0x05;  tx_o -> idle status bit for every AXI gen.
-        AXI_START,        // rx_i <- 0x06.
-        READ_PMU_DATA,    // rx_i <- 0x07;  rx_i <- core ID (LSB to MSB);               rx_i <- PMU metric;                tx_o -> PMU data.
-        READ_CTRL_STATUS  // rx_i <- 0x08;  tx_o -> uart_control current state.
+        CREATE_AXI_READ,  // rx_i <- 0x02;  rx_i <- core ID (LSB to MSB);               rx_i <- AXI_ID_BYTES transactions; rx_i <- AXLEN;    rx_i <- resp_wait bit.
+        CREATE_AXI_WRITE, // rx_i <- 0x03;  rx_i <- core ID (LSB to MSB);               rx_i <- AXI_ID_BYTES transactions; rx_i <- AXLEN;    rx_i <- resp_wait bit.
+        READ_IDLE_STATUS, // rx_i <- 0x04;  tx_o -> idle status bit for every AXI gen.
+        AXI_START,        // rx_i <- 0x05.
+        READ_PMU_DATA,    // rx_i <- 0x06;  rx_i <- core ID (LSB to MSB);               rx_i <- PMU metric;                tx_o -> PMU data.
+        READ_CTRL_STATUS  // rx_i <- 0x07;  tx_o -> uart_control current state.
     } commands_t;
 
     commands_t state, state_next;
@@ -46,7 +45,7 @@ module uart_control #(
 
     logic [4:0]  pmu_addr_next   [16];
 
-    logic [7:0]  req_depth_next      ;
+    logic        resp_wait_next  [16];
     logic [4:0]  id_next         [16];
     logic [7:0]  axlen_next      [16];
     logic        start_next          ;
@@ -99,9 +98,9 @@ module uart_control #(
             tx_data <= '0;
             tx_data_valid <= '0;
             core_select <= '0;
-            req_depth_o <= '0;
             id_o <= '{default:'0};
             axlen_o <= '{default:'0};
+            resp_wait_o <= '{default:'0};
             start_o <= '0;
             trans_counter <= '0;
             pmu_addr_o <= '{default:'0};
@@ -114,9 +113,9 @@ module uart_control #(
             tx_data <= tx_data_next;
             tx_data_valid <= tx_data_valid_next;
             core_select <= core_select_next;
-            req_depth_o <= req_depth_next;
             id_o <= id_next;
             axlen_o <= axlen_next;
+            resp_wait_o <= resp_wait_next;
             start_o <= start_next;
             trans_counter <= trans_counter_next;
             pmu_addr_o <= pmu_addr_next;
@@ -133,15 +132,14 @@ module uart_control #(
             IDLE: begin
                 if (rx_data_valid) begin
                     case (rx_data)
-                        8'h01: state_next = TEST;
-                        8'h02: state_next = SET_REQ_DEPTH;
-                        8'h03: state_next = CREATE_AXI_READ;
-                        8'h04: state_next = CREATE_AXI_WRITE;
-                        8'h05: state_next = READ_IDLE_STATUS;
-                        8'h06: state_next = AXI_START;
-                        8'h07: state_next = READ_PMU_DATA;
-                        8'h08: state_next = READ_CTRL_STATUS;
-                        default: state_next = IDLE;
+                        TEST:             state_next = TEST;
+                        CREATE_AXI_READ:  state_next = CREATE_AXI_READ;
+                        CREATE_AXI_WRITE: state_next = CREATE_AXI_WRITE;
+                        READ_IDLE_STATUS: state_next = READ_IDLE_STATUS;
+                        AXI_START:        state_next = AXI_START;
+                        READ_PMU_DATA:    state_next = READ_PMU_DATA;
+                        READ_CTRL_STATUS: state_next = READ_CTRL_STATUS;
+                        default:          state_next = IDLE;
                     endcase
                 end
                 else begin
@@ -151,14 +149,6 @@ module uart_control #(
             TEST: begin
                 if (trans_counter == 2 && tx_data_ready) begin
                     state_next = IDLE; 
-                end
-                else begin
-                    state_next = state;
-                end
-            end
-            SET_REQ_DEPTH: begin
-                if (trans_counter == 1) begin
-                    state_next = IDLE;
                 end
                 else begin
                     state_next = state;
@@ -188,7 +178,7 @@ module uart_control #(
                 end
             end
             READ_PMU_DATA: begin
-                if (trans_counter == (CORE_COUNT_BYTES + 1 + 8) && tx_data_ready) begin
+                if (trans_counter == (CORE_COUNT_BYTES + 1 + 4) && tx_data_ready) begin
                     state_next = IDLE; 
                 end
                 else begin
@@ -215,10 +205,10 @@ module uart_control #(
         trans_counter_next = trans_counter;
 
         core_select_next = core_select;
-        req_depth_next = req_depth_o;
         id_next = id_o;
         write_o = '{CORE_COUNT{1'b0}};
         axlen_next = axlen_o;
+        resp_wait_next = resp_wait_o;
         fifo_push_o = '{CORE_COUNT{1'b0}};
         start_next = start_o;
         pmu_addr_next = pmu_addr_o;
@@ -233,7 +223,7 @@ module uart_control #(
                 trans_counter_next = '0;
 
                 if (rx_data_valid) begin
-                    if (rx_data == 8'h05) begin
+                    if (rx_data == READ_IDLE_STATUS) begin
                         idle_reg_next = idle_packed; 
                     end
                 end
@@ -250,15 +240,9 @@ module uart_control #(
                     tx_data_valid_next = 0;
                 end
             end
-            SET_REQ_DEPTH: begin
-                if (rx_data_valid) begin
-                    trans_counter_next = trans_counter + 1;
-                    req_depth_next = rx_data;
-                end
-            end
             CREATE_AXI_READ, CREATE_AXI_WRITE: begin
                 write_o[core_select] = (state == CREATE_AXI_WRITE);
-                fifo_push_o[core_select] = trans_counter > (CORE_COUNT_BYTES + AXI_ID_BYTES);
+                fifo_push_o[core_select] = trans_counter > (CORE_COUNT_BYTES + AXI_ID_BYTES + 1);
 
                 if (rx_data_valid) begin
                     trans_counter_next = trans_counter + 1;
@@ -268,9 +252,12 @@ module uart_control #(
                     else if (trans_counter < (CORE_COUNT_BYTES + AXI_ID_BYTES)) begin
                         id_next[core_select][(trans_counter - CORE_COUNT_BYTES)*8 +: 8] = rx_data;
                     end
-                    else if (trans_counter == (CORE_COUNT_BYTES + AXI_ID_BYTES)) begin
+                    else if (trans_counter < (CORE_COUNT_BYTES + AXI_ID_BYTES + 1)) begin
                         axlen_next[core_select] = rx_data;
                         trans_counter_next = trans_counter + 1;
+                    end
+                    else begin
+                        resp_wait_next[core_select] = rx_data[0];
                     end
                 end
             end
@@ -311,7 +298,7 @@ module uart_control #(
                     end
                     else begin
                         tx_data_next = pmu_data_reg_next[(trans_counter - CORE_COUNT_BYTES - 1)*8 +: 8];
-                        tx_data_valid_next = (trans_counter < (CORE_COUNT_BYTES + 1 + 8));
+                        tx_data_valid_next = (trans_counter < (CORE_COUNT_BYTES + 1 + 4));
 
                         if (tx_data_valid && tx_data_ready) begin
                             trans_counter_next = trans_counter + 1;
