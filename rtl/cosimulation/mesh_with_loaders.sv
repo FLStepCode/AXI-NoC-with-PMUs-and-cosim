@@ -3,9 +3,9 @@ module mesh_with_loaders (
     input  logic        aresetn,
 
     input  logic [4:0]  pmu_addr_i   [16],
-    output logic [63:0] pmu_data_o   [16],
+    output logic [31:0] pmu_data_o   [16],
 
-    input  logic [7:0]  req_depth_i,
+    input  logic        resp_wait_i  [16],
     input  logic [4:0]  id_i         [16],
     input  logic        write_i      [16],
     input  logic [7:0]  axlen_i      [16],
@@ -37,11 +37,12 @@ module mesh_with_loaders (
                 .DATA_WIDTH(8),
                 .ADDR_WIDTH(8),
                 .ID_W_WIDTH(5),
-                .ID_R_WIDTH(5)
+                .ID_R_WIDTH(5),
+                .LOADER_ID (i)
             ) loader (
                 .clk_i       (aclk),
                 .arstn_i     (aresetn),
-                .req_depth_i (req_depth_i),
+                .resp_wait_i (resp_wait_i[i]),
                 .id_i        (id_i[i]),
                 .write_i     (write_i[i]),
                 .axlen_i     (axlen_i[i]),

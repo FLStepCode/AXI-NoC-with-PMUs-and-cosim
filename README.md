@@ -1,4 +1,4 @@
-# AXI-NoC-with-PMUs-and-cosim
+# AXI-NoC-with-PMUs-and-cosim (up to date with commit 0babeaa)
 An open-source and free to use performance measuring framework of AXI-based interconnects using cosimulation principles. Contains a 4x4 mesh NoC, which connects with masters and slaves using AXI, RAM banks (AXI RAM) connected as slaves, programmable AXI-loaders (AXI LD) connected as masters and readable AXI perfoemance metric units (AXI PMU) cutting between AXI LD and interconnect.
 All AXI LD and AXI PMU instances are controlled/read by UART overlord, which reads commands from a PC using UART and controls units accordingly.
 
@@ -211,7 +211,7 @@ then the respective table cell has ```None``` written in it.
 
 To reset the contents of all of the PMUs you have to reset the whole design (async negative reset).
 
-Check out [this](https://zipcpu.com/blog/2021/08/14/axiperf.html) ZipCPU blog post for more info about the principles
+Check out [this](https://zipcpu.com/blog/2021/08/14/axiperf.html) ZipCPU for more info about the principles
 of event-based performance measurement.
 
 # HDL design insights
