@@ -2,17 +2,9 @@
 
 import cocotb
 from cocotb.triggers import Timer, RisingEdge
+from cocotb.clock import Clock
 
 import random
-
-async def generate_clock(dut):
-    """Generate clock pulses."""
-
-    for _ in range(10**32):
-        dut.clk.value = 0
-        await Timer(1, unit="ns")
-        dut.clk.value = 1
-        await Timer(1, unit="ns")
 
 async def send_uart(dut, data_to_send):
     for _ in range(10**32):
@@ -37,14 +29,14 @@ async def send_uart(dut, data_to_send):
     dut.rx_data_ready.value = 1
     await RisingEdge(dut.clk)
     dut.rx_data_ready.value = 0
-    return dut.rx_data.value.to_unsigned()
+    return dut.rx_data.value.integer
 
 @cocotb.test()
 async def uart_test(dut):
     dut.rst_n.value = 0
     dut.tx_data_valid.value = 0
     dut.rx_data_ready.value = 0
-    cocotb.start_soon(generate_clock(dut))  # run the clock "in the background
+    cocotb.start_soon(Clock(dut.clk, 2, units='ns').start())  # run the clock "in the background
     await RisingEdge(dut.clk)
     dut.rst_n.value = 1
 

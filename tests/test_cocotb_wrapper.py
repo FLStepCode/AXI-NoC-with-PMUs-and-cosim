@@ -3,7 +3,7 @@ from os import environ, makedirs, path
 from shutil import copytree
 
 import pytest
-from cocotb_tools.runner import get_runner
+from cocotb.runner import get_runner
 
 VERILOG_SOURCES   = environ['VERILOG_SOURCES'].strip().split(' ')
 INCLUDE_DIRS      = environ['INCLUDE_DIRS'].strip().split(' ')
