@@ -1,4 +1,26 @@
-module mesh_with_loaders (
+`include "defines.svh"
+
+module mesh_with_loaders # (
+    parameter ID_W_WIDTH = 5,
+    parameter ID_R_WIDTH = 5,
+    parameter MAX_ID_WIDTH = 4,
+    parameter ADDR_WIDTH = 8,
+
+    parameter DATA_WIDTH = 8,
+    parameter AXI_DATA_WIDTH = 32
+    `ifdef TID_PRESENT
+    ,
+    parameter ID_WIDTH = 4
+    `endif
+    `ifdef TDEST_PRESENT
+    ,
+    parameter DEST_WIDTH = 4
+    `endif
+    `ifdef TUSER_PRESENT
+    ,
+    parameter USER_WIDTH = 4
+    `endif
+) (
     input  logic        aclk,
     input  logic        aresetn,
 
@@ -14,30 +36,61 @@ module mesh_with_loaders (
     output logic        idle_o       [16]
 );
 
-    axi_if #(
-        .DATA_WIDTH(8),
-        .ADDR_WIDTH(8),
-        .ID_W_WIDTH(5),
-        .ID_R_WIDTH(5)
-    ) axi[16](), axi_ram[16]();
+    `include "axi_type.svh"
+
+    axi_mosi_t axi_mosi[16];
+    axi_miso_t axi_miso[16];
+
+    axi_mosi_t axi_mosi_ram[16];
+    axi_miso_t axi_miso_ram[16];
 
     generate
         genvar i;
         for (i = 0; i < 16; i++) begin : map_wires
 
-            axi_pmu pmu (
+            axi_pmu #(
+                .ADDR_WIDTH(ADDR_WIDTH),
+                .ID_W_WIDTH(ID_W_WIDTH),
+                .ID_R_WIDTH(ID_R_WIDTH),
+                .MAX_ID_WIDTH(MAX_ID_WIDTH)
+                `ifdef TID_PRESENT
+                ,
+                .ID_WIDTH(ID_WIDTH)
+                `endif
+                `ifdef TDEST_PRESENT
+                ,
+                .DEST_WIDTH(DEST_WIDTH)
+                `endif
+                `ifdef TUSER_PRESENT
+                ,
+                .USER_WIDTH(USER_WIDTH)
+                `endif
+            ) pmu (
                 .aclk    (aclk),
                 .aresetn (aresetn),
-                .mon_axi (axi[i]),
+                .mon_axi_miso (axi_miso[i]),
+                .mon_axi_mosi (axi_mosi[i]),
                 .addr_i  (pmu_addr_i[i]),
                 .data_o  (pmu_data_o[i])
             );
 
             axi_master_loader #(
-                .DATA_WIDTH(8),
-                .ADDR_WIDTH(8),
-                .ID_W_WIDTH(5),
-                .ID_R_WIDTH(5)
+                .ADDR_WIDTH(ADDR_WIDTH),
+                .ID_W_WIDTH(ID_W_WIDTH),
+                .ID_R_WIDTH(ID_R_WIDTH),
+                .MAX_ID_WIDTH(MAX_ID_WIDTH)
+                `ifdef TID_PRESENT
+                ,
+                .ID_WIDTH(ID_WIDTH)
+                `endif
+                `ifdef TDEST_PRESENT
+                ,
+                .DEST_WIDTH(DEST_WIDTH)
+                `endif
+                `ifdef TUSER_PRESENT
+                ,
+                .USER_WIDTH(USER_WIDTH)
+                `endif
             ) loader (
                 .clk_i       (aclk),
                 .arstn_i     (aresetn),
@@ -48,7 +101,8 @@ module mesh_with_loaders (
                 .fifo_push_i (fifo_push_i[i]),
                 .start_i     (start_i),
                 .idle_o      (idle_o[i]),
-                .m_axi_o     (axi[i])
+                .m_axi_i     (axi_miso[i]),
+                .m_axi_o     (axi_mosi[i])
             );
         end
     endgenerate
@@ -59,21 +113,26 @@ module mesh_with_loaders (
         .ACLK(aclk),
         .ARESETn(aresetn),
 
-        .s_axi_in(axi),
-        .m_axi_out(axi_ram)
+        .s_axi_i(axi_mosi),
+        .s_axi_o(axi_miso),
+
+        .m_axi_i(axi_miso_ram),
+        .m_axi_o(axi_mosi_ram)
     );
 
     generate
         for (i = 0; i < 16; i++) begin : map_rams
             axi_ram #(
-                .DATA_WIDTH(8),
-                .ADDR_WIDTH(8),
+                .AXI_DATA_WIDTH(32),
+                .BYTE_WIDTH(8),
+                .ADDR_WIDTH(12),
                 .ID_W_WIDTH(5),
                 .ID_R_WIDTH(5)
             ) ram (
-                .clk(aclk),
-                .rst_n(aresetn),
-                .axi_s(axi_ram[i])
+                .clk_i(aclk),
+                .rst_n_i(aresetn),
+                .in_mosi_i(axi_mosi_ram[i]),
+                .in_miso_o(axi_miso_ram[i])
             );
         end
 

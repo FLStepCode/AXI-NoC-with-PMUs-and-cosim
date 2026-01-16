@@ -17,6 +17,7 @@ rtl/axi/router/src/router_dual_parallel.sv
 rtl/axi/XY_mesh/XY_mesh_dual.sv
 rtl/axi/XY_mesh/XY_mesh_dual_parallel.sv
 rtl/axi/XY_mesh/XY_mesh_dual_cpu.sv
+rtl/axi/XY_mesh/XY_mesh.sv
 rtl/axi/axi_demux.sv
 rtl/axi/axi_if.sv
 rtl/axi/axi_master_loader.sv
@@ -31,6 +32,7 @@ rtl/axi/ram_if.sv
 rtl/axi/ram.sv
 rtl/axi/stream_arbiter.sv
 rtl/axi/stream_fifo.sv
+rtl/axi/axis_fifo_buffer.sv
 rtl/axi/axi_pmu.sv
 rtl/uart/receiver.sv
 rtl/uart/transmitter.sv

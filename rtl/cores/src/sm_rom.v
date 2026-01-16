@@ -8,7 +8,7 @@
  *                        Aleksandr Romanov 
  */ 
 
-// `define TEST
+`define SIM
 
 `ifdef SIM
     `define PATH ""

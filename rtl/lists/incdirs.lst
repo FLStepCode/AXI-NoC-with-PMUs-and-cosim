@@ -1,0 +1,3 @@
+rtl/axi
+rtl/cores/data_mem
+rtl/cores/instr_mem
