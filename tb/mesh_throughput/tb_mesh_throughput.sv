@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module mesh_throughput (
+module tb_mesh_throughput (
     input aresetn,
 
     output logic awready[16],

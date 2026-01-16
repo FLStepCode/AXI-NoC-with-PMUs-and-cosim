@@ -45,7 +45,7 @@ test: $(VENV_DIR)
 run_pytest: $(VENV_DIR)
 	@export TESTS_DIRS="$(TESTS_DIRS)"; \
 	export INCLUDE_DIRS="$(INCLUDE_DIRS)"; \
-	export VERILOG_SOURCES="$(sort $(VERILOG_SOURCES) $(TB_FILES))"; \
+	export VERILOG_SOURCES="$(CURDIR)/tests/test.svh $(VERILOG_SOURCES) $(TB_FILES)"; \
 	export LOGS_DIR=${LOGS_DIR}; \
 	export RESULTS_DIR=${RESULTS_DIR}; \
 	export TESTS_DIR=${TESTS_DIR}; \
