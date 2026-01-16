@@ -123,7 +123,7 @@ module mesh_with_loaders # (
     generate
         for (i = 0; i < 16; i++) begin : map_rams
             axi_ram #(
-                .DATA_WIDTH(32),
+                .AXI_DATA_WIDTH(32),
                 .BYTE_WIDTH(8),
                 .ADDR_WIDTH(12),
                 .ID_W_WIDTH(5),

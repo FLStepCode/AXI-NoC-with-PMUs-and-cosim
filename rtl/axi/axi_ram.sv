@@ -36,12 +36,12 @@ module axi_ram
     logic [ADDR_WIDTH-1:0] addr_a;
     logic [BYTE_WIDTH*WSRTB_W-1:0] data_a;
     logic [BYTE_WIDTH*WSRTB_W-1:0] write_a;
-    logic [WSRTB_W-1:0] write_en_a;
+    logic [WSRTB_W-1:0] byte_en_a;
     
     logic [ADDR_WIDTH-1:0] addr_b;
     logic [BYTE_WIDTH*WSRTB_W-1:0] data_b;
     logic [BYTE_WIDTH*WSRTB_W-1:0] write_b;
-    logic [WSRTB_W-1:0] write_en_b;
+    logic [WSRTB_W-1:0] byte_en_b;
 
     axi2ram #(
         .ID_W_WIDTH(ID_W_WIDTH),
@@ -68,12 +68,12 @@ module axi_ram
         .addr_a(addr_a),
         .data_a(data_a),
         .write_a(write_a),
-        .write_en_a(write_en_a),
+        .byte_en_a(byte_en_a),
 
         .addr_b(addr_b),
         .data_b(data_b),
         .write_b(write_b),
-        .write_en_b(write_en_b),
+        .byte_en_b(byte_en_b),
 
         .in_mosi_i(in_mosi_i),
         .in_miso_o(in_miso_o)
@@ -90,14 +90,14 @@ module axi_ram
         .addr_a(addr_a),
         .data_a(data_a),
         .write_a(write_a),
-        .byte_en_a(write_en_a),
-        .write_en_a(|write_en_a),
+        .byte_en_a(byte_en_a),
+        .write_en_a(|byte_en_a),
 
         .addr_b(addr_b),
         .data_b(data_b),
         .write_b(write_b),
-        .byte_en_b(write_en_b),
-        .write_en_b(|write_en_b)
+        .byte_en_b(byte_en_b),
+        .write_en_b(|byte_en_b)
 
     );
   

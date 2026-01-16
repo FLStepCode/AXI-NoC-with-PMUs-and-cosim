@@ -1,8 +1,8 @@
 `include "defines.svh"
 
 module XY_mesh_dual_parallel #(
+    parameter AXI_DATA_WIDTH = 32,
     parameter ADDR_WIDTH = 16,
-    parameter AXI_DATA_WIDTH = 8,
     parameter ID_W_WIDTH = 5,
     parameter ID_R_WIDTH = 5
     `ifdef TID_PRESENT
@@ -118,6 +118,7 @@ module XY_mesh_dual_parallel #(
             for (j = 0; j < MAX_ROUTERS_X; j++) begin : X
                 
                 axi2axis_XY #(
+                    .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                     .ADDR_WIDTH(ADDR_WIDTH),
                     .ID_W_WIDTH(ID_W_WIDTH),
                     .ID_R_WIDTH(ID_R_WIDTH),

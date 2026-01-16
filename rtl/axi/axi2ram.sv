@@ -29,14 +29,12 @@ module axi2ram
     // Port a 
     output logic [ADDR_WIDTH-1:0] addr_a,
     output logic [AXI_DATA_WIDTH-1:0] write_a,
-    output logic write_en_a,
     output logic [BATCH_WIDTH-1:0] byte_en_a,
     input  logic [AXI_DATA_WIDTH-1:0] data_a,
 
     // Port b 
     output logic [ADDR_WIDTH-1:0] addr_b,
     output logic [AXI_DATA_WIDTH-1:0] write_b,
-    output logic write_en_b,
     output logic [BATCH_WIDTH-1:0] byte_en_b,
     input  logic [AXI_DATA_WIDTH-1:0] data_b,
 

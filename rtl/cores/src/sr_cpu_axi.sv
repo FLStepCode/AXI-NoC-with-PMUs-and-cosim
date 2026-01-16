@@ -7,7 +7,7 @@ module sr_cpu_axi
     parameter MAX_ID_WIDTH = 4,
     parameter ADDR_WIDTH = 16,
 
-    parameter AXI_DATA_WIDTH = 32
+    parameter AXI_DATA_WIDTH = 8
     `ifdef TID_PRESENT
     ,
     parameter ID_WIDTH = 4

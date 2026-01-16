@@ -78,6 +78,7 @@ module XY_mesh #(
             for (j = 0; j < MAX_ROUTERS_X; j++) begin : X
                 
                 axi2axis_XY #(
+                    .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                     .ADDR_WIDTH(ADDR_WIDTH),
                     .ID_W_WIDTH(ID_W_WIDTH),
                     .ID_R_WIDTH(ID_R_WIDTH),

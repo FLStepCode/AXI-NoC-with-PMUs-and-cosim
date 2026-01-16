@@ -62,7 +62,7 @@ module axi_master_loader #(
     assign m_axi_o.data.aw.AWID    = id_rd;
     assign m_axi_o.data.aw.AWADDR  = LOADER_ID << 2;
     assign m_axi_o.data.aw.AWLEN   = axlen_rd;
-    assign m_axi_o.data.aw.AWSIZE  = $clog2(DATA_WIDTH/8);
+    assign m_axi_o.data.aw.AWSIZE  = $clog2(AXI_DATA_WIDTH/8);
     assign m_axi_o.data.aw.AWBURST = 2'b01;
 
     assign m_axi_o.data.w.WDATA   = 'h30 + LOADER_ID;
@@ -73,7 +73,7 @@ module axi_master_loader #(
     assign m_axi_o.data.ar.ARID    = id_rd;
     assign m_axi_o.data.ar.ARADDR  = LOADER_ID << 2;
     assign m_axi_o.data.ar.ARLEN   = axlen_rd;
-    assign m_axi_o.data.ar.ARSIZE  = $clog2(DATA_WIDTH/8);
+    assign m_axi_o.data.ar.ARSIZE  = $clog2(AXI_DATA_WIDTH/8);
     assign m_axi_o.data.ar.ARBURST = 2'b01;
 
     assign m_axi_o.RREADY = 1'b1;
