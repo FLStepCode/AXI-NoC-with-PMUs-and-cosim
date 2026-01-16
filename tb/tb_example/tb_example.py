@@ -29,7 +29,7 @@ async def send_uart(dut, data_to_send):
     dut.rx_data_ready.value = 1
     await RisingEdge(dut.clk)
     dut.rx_data_ready.value = 0
-    return dut.rx_data.value.integer
+    return dut.rx_data.value.to_unsigned()
 
 @cocotb.test()
 async def uart_test(dut):

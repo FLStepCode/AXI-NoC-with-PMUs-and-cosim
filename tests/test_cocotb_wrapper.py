@@ -3,7 +3,7 @@ from os import environ, makedirs, path
 from shutil import copytree
 
 import pytest
-from cocotb.runner import get_runner
+from cocotb_tools.runner import get_runner
 
 VERILOG_SOURCES   = environ['VERILOG_SOURCES'].strip().split(' ')
 INCLUDE_DIRS      = environ['INCLUDE_DIRS'].strip().split(' ')
@@ -54,5 +54,5 @@ def test_cocotb(cocotb_test_dir) -> None:
         test_dir=TESTS_DIR,
         waves=False,
         log_file=LOGS_DIR+f'/{test_module}.log',
-        results_xml=None
+        results_xml=RESULTS_DIR+f'/{test_module}.xml'
     )
