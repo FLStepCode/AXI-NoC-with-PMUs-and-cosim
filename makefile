@@ -17,10 +17,9 @@ LIST_DIR ?= $(CURDIR)/rtl/lists
 LIST_RTL ?= $(LIST_DIR)/files_rtl.lst
 VERILOG_SOURCES ?= $(foreach file,$(shell cat $(LIST_RTL)),$(CURDIR)/$(file))
 
-TB_FILES ?=  $(foreach file,$(shell find tb/ -type f -name '*.sv'),$(CURDIR)/$(file))
-
 TB_DIR ?= $(CURDIR)/tb
-TESTS_DIRS ?= $(sort $(dir $(wildcard $(TB_DIR)/*/)))
+TESTS_DIRS ?= $(sort $(dir $(wildcard $(TB_DIR)/tb_*/)))
+TB_FILES ?=  $(foreach file,$(shell find $(TB_DIR)/ -type f -name '*.sv'),$(file))
 
 BUILD_DIR   ?= $(COCOTB_DIR)
 TESTS_DIR   ?= $(BUILD_DIR)/tests
