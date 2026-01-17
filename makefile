@@ -30,8 +30,13 @@ RESULTS_DIR ?= ${LOGS_DIR}/results
 BUILD_ARGS ?=
 SIM_ARGS ?= -suppress 12110 -autofindloop -suppress 12130
 
+ifndef GENERAL_TOPLEVEL
 COCOTB_TOPLEVEL     ?= tb_uart_loop
 COCOTB_TEST_MODULES ?= tb_example
+else
+COCOTB_TOPLEVEL     ?= $(GENERAL_TOPLEVEL)
+COCOTB_TEST_MODULES ?= $(GENERAL_TOPLEVEL)
+endif
 
 TOPLEVEL ?= toplevel
 
