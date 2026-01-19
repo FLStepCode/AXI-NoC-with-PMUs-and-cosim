@@ -285,6 +285,13 @@ module axi_mux #(
 
     always_comb begin
         int sel;
+        int i;
+        
+        for(int i = 0; i < INPUT_NUM; i++) begin
+            BVALID[i] = '0;
+            BID[i] = '0;
+        end
+
         sel = INPUT_NUM - 1;
 
         for (int j = 0; j < INPUT_NUM-1; j++) begin
@@ -302,7 +309,15 @@ module axi_mux #(
 
     always_comb begin
         int sel;
+        int i;
         sel = INPUT_NUM - 1;
+        
+        for(int i = 0; i < INPUT_NUM; i++) begin
+            RVALID[i] = '0;
+            RID[i] = '0;
+            RDATA[i] = '0;
+            RLAST[i] = '0;
+        end
 
         for (int j = 0; j < INPUT_NUM-1; j++) begin
             if (m_axi_i.data.r.RID >= ID_ROUTING[j * 2] && m_axi_i.data.r.RID <= ID_ROUTING[j * 2 + 1]) begin
