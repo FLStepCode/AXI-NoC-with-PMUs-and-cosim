@@ -5,7 +5,7 @@ module tb_mesh (
 
     output logic awready[16],
     input  logic awvalid[16],
-    input  logic [3:0] awid[16],
+    input  logic [4:0] awid[16],
     input  logic [15:0] awaddr[16],
     input  logic [7:0] awlen[16],
     input  logic [2:0] awsize[16],
@@ -18,19 +18,19 @@ module tb_mesh (
     input  logic wlast[16],
 
     output logic bvalid[16],
-    output logic [3:0] bid[16],
+    output logic [4:0] bid[16],
     input  logic bready[16],
 
     output logic arready[16],
     input  logic arvalid[16],
-    input  logic [3:0] arid[16],
+    input  logic [4:0] arid[16],
     input  logic [15:0] araddr[16],
     input  logic [7:0] arlen[16],
     input  logic [2:0] arsize[16],
     input  logic [1:0] arburst[16],
 
     output logic rvalid[16],
-    output logic [3:0] rid[16],
+    output logic [4:0] rid[16],
     output logic [7:0] rdata[16],
     output logic rlast[16],
     input  logic rready[16]
@@ -104,7 +104,11 @@ module tb_mesh (
 
     );
 
-    axi_ram ram[16] (
+    axi_ram #(
+        .ID_W_WIDTH(5),
+        .ID_R_WIDTH(5),
+        .AXI_DATA_WIDTH(8)
+    ) ram[16] (
         .clk_i({16{aclk}}),
         .rst_n_i({16{aresetn}}),
 

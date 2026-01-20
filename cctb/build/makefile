@@ -30,7 +30,7 @@ endif
 ifndef SIM_ARGS
 SIM_ARGS :=
 SIM_ARGS += -suppress 12110 -suppress 12130
-SIM_ARGS += -autofindloop -no_autoacc
+SIM_ARGS += -autofindloop +acc -debug
 endif
 
 CCTB_DIR ?= $(CACHE_DIR)/cctb
