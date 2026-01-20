@@ -38,43 +38,47 @@ module tb_router (
     input  logic rready[5]
     
 );
-    axi_if axi[5](), axi_ram[5]();
-    axis_if #(.DATA_WIDTH(40)) axis_to_q[5](), axis_from_q[5]();
+
+    axi_mosi_t axi_mosi[5], axi_ram_mosi[5];
+    axi_miso_t axi_miso[5], axi_ram_miso[5];
+
+    axis_miso_t axis_miso_to_q[5], axis_miso_from_q[5];
+    axis_mosi_t axis_mosi_to_q[5], axis_mosi_from_q[5];
 
     generate
         for (genvar i = 0; i < 5; i++) begin : map_wires
             always_comb begin
-                axi[i].AWVALID = awvalid[i];
-                axi[i].AWID    = awid[i];
-                axi[i].AWADDR  = awaddr[i];
-                axi[i].AWLEN   = awlen[i];
-                axi[i].AWSIZE  = awsize[i];
-                axi[i].AWBURST = awburst[i];
-                awready[i]     = axi[i].AWREADY;
+                axi_mosi[i].AWVALID = awvalid[i];
+                axi_mosi[i].data.aw.AWID    = awid[i];
+                axi_mosi[i].data.aw.AWADDR  = awaddr[i];
+                axi_mosi[i].data.aw.AWLEN   = awlen[i];
+                axi_mosi[i].data.aw.AWSIZE  = awsize[i];
+                axi_mosi[i].data.aw.AWBURST = awburst[i];
+                awready[i]     = axi_miso[i].AWREADY;
 
-                axi[i].WVALID = wvalid[i];
-                axi[i].WDATA  = wdata[i];
-                axi[i].WSTRB  = wstrb[i];
-                axi[i].WLAST  = wlast[i];
-                wready[i]     = axi[i].WREADY;
+                axi_mosi[i].WVALID = wvalid[i];
+                axi_mosi[i].data.w.WDATA  = wdata[i];
+                axi_mosi[i].data.w.WSTRB  = wstrb[i];
+                axi_mosi[i].data.w.WLAST  = wlast[i];
+                wready[i]     = axi_miso[i].WREADY;
                 
-                bvalid[i]     = axi[i].BVALID;
-                bid[i]        = axi[i].BID;
-                axi[i].BREADY = bready[i];
+                bvalid[i]     = axi_miso[i].BVALID;
+                bid[i]        = axi_miso[i].data.b.BID;
+                axi_mosi[i].BREADY = bready[i];
                 
-                axi[i].ARVALID = arvalid[i];
-                axi[i].ARID    = arid[i];
-                axi[i].ARADDR  = araddr[i];
-                axi[i].ARLEN   = arlen[i];
-                axi[i].ARSIZE  = arsize[i];
-                axi[i].ARBURST = arburst[i];
-                arready[i]     = axi[i].ARREADY;
+                axi_mosi[i].ARVALID = arvalid[i];
+                axi_mosi[i].data.ar.ARID    = arid[i];
+                axi_mosi[i].data.ar.ARADDR  = araddr[i];
+                axi_mosi[i].data.ar.ARLEN   = arlen[i];
+                axi_mosi[i].data.ar.ARSIZE  = arsize[i];
+                axi_mosi[i].data.ar.ARBURST = arburst[i];
+                arready[i]     = axi_miso[i].ARREADY;
 
-                rvalid[i]     = axi[i].RVALID;
-                rid[i]        = axi[i].RID;
-                rdata[i]      = axi[i].RDATA;
-                rlast[i]      = axi[i].RLAST;
-                axi[i].RREADY = rready[i];
+                rvalid[i]     = axi_miso[i].RVALID;
+                rid[i]        = axi_miso[i].data.r.RID;
+                rdata[i]      = axi_miso[i].data.r.RDATA;
+                rlast[i]      = axi_miso[i].data.r.RLAST;
+                axi_mosi[i].RREADY = rready[i];
             end
         end
     endgenerate
@@ -90,36 +94,47 @@ module tb_router (
                 .MAX_ROUTERS_X(3),
                 .MAX_ROUTERS_Y(3)
             ) bridges (
-                .ACLK(aclk),
-                .ARESETn(aresetn),
-                
-                .s_axi_in(axi[i]),
-                .m_axi_out(axi_ram[i]),
-                
-                .s_axis_resp_in(axis_from_q[i]),
-                .m_axis_resp_out(axis_to_q[i])
+                .ACLK(ACLK),
+                .ARESETn(ARESETn),
+
+                .s_axi_i(axi_mosi[i]),
+                .s_axi_o(axi_miso[i]),
+
+                .s_axis_resp_i(axis_mosi_from_q[i]),
+                .s_axis_resp_o(axis_miso_from_q[i]),
+
+
+                .m_axi_i(axi_ram_miso[i]),
+                .m_axi_o(axi_ram_mosi[i]),
+
+                .m_axis_resp_i(axis_miso_to_q[i]),
+                .m_axis_resp_o(axis_mosi_to_q[i])
             );
         end
     endgenerate
 
     axi_ram ram_left[5] (
-        .clk({5{aclk}}),
-        .rst_n({5{aresetn}}),
-        .axi_s(axi_ram)
+        .clk_i({5{aclk}}),
+        .rst_n_i({5{aresetn}}),
+        
+        .in_mosi_i(axi_ram_mosi),
+        .in_miso_o(axi_ram_miso)
     );
 
     router #(
-        .DATA_WIDTH(40),
         .ROUTER_X(1),
         .ROUTER_Y(1),
         .MAX_ROUTERS_X(3),
         .MAX_ROUTERS_Y(3)
     ) router (
-        .clk(aclk),
-        .rst_n(aresetn),
+        .clk_i(aclk),
+        .rst_n_i(aresetn),
 
-        .in(axis_to_q),
-        .out(axis_from_q)
+        .in_mosi_i(axis_mosi_to_q),
+        .in_miso_o(axis_miso_to_q),
+
+        .out_miso_i(axis_miso_from_q),
+        .out_mosi_o(axis_mosi_from_q)
     );
     
 endmodule
