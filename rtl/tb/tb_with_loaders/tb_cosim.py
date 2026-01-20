@@ -23,6 +23,21 @@ async def test(dut):
 
     await sink.read()
 
+    await source.write(int.to_bytes(8, 1, 'little'))
+    await source.wait()
+    await source.write(int.to_bytes(1, 1, 'little'))
+    await source.wait()
+
+    await source.write(int.to_bytes(8, 1, 'little'))
+    await source.wait()
+    await source.write(int.to_bytes(0, 1, 'little'))
+    await source.wait()
+
+    await source.write(int.to_bytes(8, 1, 'little'))
+    await source.wait()
+    await source.write(int.to_bytes(1, 1, 'little'))
+    await source.wait()
+
     for i in range(32):
         dest = random.randint(1, 16)
 
