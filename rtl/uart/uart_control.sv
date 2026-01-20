@@ -47,7 +47,7 @@ module uart_control #(
     logic [4:0]  pmu_addr_next   [16];
 
     logic [7:0]  req_depth_next      ;
-    logic [4:0]  id_next         [16];
+    logic [AXI_ID_WIDTH-1:0] id_next[16];
     logic [7:0]  axlen_next      [16];
     logic        start_next          ;
 
