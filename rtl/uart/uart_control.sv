@@ -40,7 +40,7 @@ module uart_control #(
 
     logic [7:0] rx_data, tx_data, tx_data_next;
     logic       rx_data_valid, tx_data_valid, tx_data_valid_next;
-    logic       tx_data_ready;
+    logic       rx_data_ready, tx_data_ready;
 
     logic [31:0] trans_counter, trans_counter_next;
 
@@ -57,6 +57,8 @@ module uart_control #(
     logic [CORE_COUNT-1:0] idle_reg, idle_reg_next;
     logic [63:0] pmu_data_reg, pmu_data_reg_next;
     logic pmu_to_reg, pmu_to_reg_next;
+
+    assign rx_data_ready = '1;
 
     generate
         genvar i;
@@ -75,7 +77,7 @@ module uart_control #(
         .rx_i         (rx_i),
 
         .data_o       (rx_data),
-        .data_ready_i ('1),
+        .data_ready_i (rx_data_ready),
         .data_valid_o (rx_data_valid)
     );
 
