@@ -7,7 +7,11 @@ FILES_RTL_PATH ?= $(RTL_PATH)/lists/files_rtl.lst
 INCDIRS_PATH ?= $(RTL_PATH)/lists/incdirs.lst
 CUSTOM_ASSIGNMENTS_PATH ?= $(QUARTUS_BUILD_PATH)/custom_assignments.tcl
 
-.PHONY: all compile fmax
+RELEASE_DIR 	?= $(CURDIR)/release
+RELEASE_DIRS 	?= $(wildcard $(RELEASE_DIR)/*/) 
+RELEASE_FILES	?= $(foreach directory,$(RELEASE_DIRS), $(directory)$(shell basename $(directory)).qpf)
+
+.PHONY: all compile fmax create_releases
 
 all: compile
 
@@ -24,6 +28,15 @@ $(QUARTUS_BUILD_PATH)/$(TOPLEVEL)/NoC.qpf: $(shell find $(CURDIR)/rtl -type f | 
 
 	@cd $(QUARTUS_BUILD_PATH)/$(TOPLEVEL);\
 	quartus_sh -t $(QUARTUS_BUILD_PATH)/Setup_sh.tcl
+
+create_releases: $(RELEASE_FILES)
+
+$(RELEASE_FILES): $(foreach file,$(shell cat $(dir $@)sources.lst),$(CURDIR)/$(file)) $(foreach file,$(shell cat $(dir $@)incfiles.lst),$(CURDIR)/$(file))
+	@touch $(dir $@)src $(dir $@)inc
+	@rm -r $(dir $@)src $(dir $@)inc
+	@mkdir $(dir $@)src $(dir $@)inc
+	$(foreach file,$(shell cat $(dir $@)sources.lst), cp $(CURDIR)/$(file) $(dir $@)src;)
+	$(foreach file,$(shell cat $(dir $@)incfiles.lst), cp $(CURDIR)/$(file) $(dir $@)inc;)
 
 clean:
 	rm -rf $(QUARTUS_BUILD_PATH)/$(TOPLEVEL)
