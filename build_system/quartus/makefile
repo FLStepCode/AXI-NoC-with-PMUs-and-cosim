@@ -9,7 +9,7 @@ CUSTOM_ASSIGNMENTS_PATH ?= $(QUARTUS_BUILD_PATH)/custom_assignments.tcl
 
 RELEASE_DIR 	?= $(CURDIR)/release
 RELEASE_DIRS 	?= $(wildcard $(RELEASE_DIR)/*/) 
-RELEASE_FILES	?= $(foreach directory,$(RELEASE_DIRS), $(directory)$(shell basename $(directory)).qpf)
+RELEASE_FILES	?= $(foreach directory,$(RELEASE_DIRS), $(directory)package/$(shell basename $(directory)).qpf)
 
 .PHONY: all compile fmax create_releases
 
@@ -31,12 +31,21 @@ $(QUARTUS_BUILD_PATH)/$(TOPLEVEL)/NoC.qpf: $(shell find $(CURDIR)/rtl -type f | 
 
 create_releases: $(RELEASE_FILES)
 
-$(RELEASE_FILES): $(foreach file,$(shell cat $(dir $@)sources.lst),$(CURDIR)/$(file)) $(foreach file,$(shell cat $(dir $@)incfiles.lst),$(CURDIR)/$(file))
-	@touch $(dir $@)src $(dir $@)inc
-	@rm -r $(dir $@)src $(dir $@)inc
-	@mkdir $(dir $@)src $(dir $@)inc
-	$(foreach file,$(shell cat $(dir $@)sources.lst), cp $(CURDIR)/$(file) $(dir $@)src;)
-	$(foreach file,$(shell cat $(dir $@)incfiles.lst), cp $(CURDIR)/$(file) $(dir $@)inc;)
+$(RELEASE_FILES): $(foreach file,$(shell cat $(dir $@)../sources.lst),$(CURDIR)/$(file)) $(foreach file,$(shell cat $(dir $@)../incfiles.lst),$(CURDIR)/$(file))
+	@touch $(dir $@)
+	@rm -r $(dir $@)
+	@mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)src $(dir $@)inc
+	@$(foreach file,$(shell cat $(dir $@)../sources.lst), cp $(CURDIR)/$(file) $(dir $@)src;)
+	@$(foreach file,$(shell cat $(dir $@)../incfiles.lst), cp $(CURDIR)/$(file) $(dir $@)inc;)
+
+	@mkdir -p $(QUARTUS_BUILD_PATH)/$(TOPLEVEL) $(VARS_TCL_PATH)
+	@echo set TOPLEVEL $(notdir $(basename $@)) > $(VARS_TCL)
+	@echo set RTL_FILES $(foreach file,$(shell ls --format=horizontal $(dir $@)src), src/$(file)) >> $(VARS_TCL)
+	@echo set INCDIR inc >> $(VARS_TCL)
+
+	@cd $(dir $@);\
+		quartus_sh -t $(QUARTUS_BUILD_PATH)/package.tcl
 
 clean:
 	rm -rf $(QUARTUS_BUILD_PATH)/$(TOPLEVEL)
