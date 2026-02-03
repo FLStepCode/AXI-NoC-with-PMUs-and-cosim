@@ -11,7 +11,7 @@ module de10standard_top(
     cosim_top #(
         .CORE_COUNT   (16),
         .AXI_ID_WIDTH (5),
-        .BAUD_RATE    (57_600),
+        .BAUD_RATE    (800_000),
         .CLK_FREQ     (50_000_000)
     ) top (
         .clk_i   (CLOCK_50),

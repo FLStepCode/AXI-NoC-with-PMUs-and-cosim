@@ -22,6 +22,17 @@ module cosim_top #(
 
     logic                    rstn_noc;
 
+    logic [2:0]              rx_sync;
+
+    always_ff @(posedge clk_i or negedge arstn_i) begin
+        if (!arstn_i) begin
+            rx_sync <= 3'b111;
+        end
+        else begin
+            rx_sync <= {rx_sync[1:0], rx_i};
+        end
+    end
+
     mesh_with_loaders mesh_with_loaders (
         .aclk        (clk_i),
         .aresetn     (rstn_noc ),
@@ -46,7 +57,7 @@ module cosim_top #(
     ) uart_control (
         .clk_i        (clk_i),
         .arstn_i      (arstn_i),
-        .rx_i         (rx_i),
+        .rx_i         (rx_sync[2]),
         .tx_o         (tx_o),
 
         .pmu_addr_o   (pmu_addr ),

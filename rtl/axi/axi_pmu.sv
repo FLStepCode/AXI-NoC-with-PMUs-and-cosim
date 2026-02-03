@@ -32,7 +32,7 @@ module axi_pmu # (
 
     `include "axi_type.svh"
 
-    typedef struct {
+    typedef struct packed {
         logic [31:0] idle;
         logic [31:0] outstanding;
         logic [31:0] ar_stall;
@@ -42,7 +42,7 @@ module axi_pmu # (
         logic [31:0] r_handshake;
     } read_counters;
 
-    typedef struct {
+    typedef struct packed {
         logic [31:0] idle;
         logic [31:0] outstanding;
         logic [31:0] responding;
@@ -97,7 +97,7 @@ module axi_pmu # (
 
     always_ff @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            rc <= {default:'0};
+            rc <= '0;
         end
         else begin
             if (!mon_axi_mosi.ARVALID && (rc.outstanding == 0)) begin
@@ -143,7 +143,7 @@ module axi_pmu # (
 
     always_ff @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            wc <= {default:'0};
+            wc <= '0;
         end
         else begin
             if (!mon_axi_mosi.AWVALID && (wc.outstanding == 0)) begin

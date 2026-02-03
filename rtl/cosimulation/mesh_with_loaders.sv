@@ -79,7 +79,7 @@ module mesh_with_loaders # (
                 .ADDR_WIDTH(ADDR_WIDTH),
                 .ID_W_WIDTH(ID_W_WIDTH),
                 .ID_R_WIDTH(ID_R_WIDTH),
-                .FIFO_DEPTH(64),
+                .FIFO_DEPTH(64)
                 `ifdef TID_PRESENT
                 ,
                 .ID_WIDTH(ID_WIDTH)
@@ -125,7 +125,7 @@ module mesh_with_loaders # (
 
     axi_ram #(
         .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-        .BYTE_WIDTH(AXI_DATA_WIDTH/8 + (AXI_DATA_WIDTH%8 != 0)),
+        .BYTE_WIDTH(8),
         .ADDR_WIDTH(ADDR_WIDTH),
         .ID_W_WIDTH(ID_W_WIDTH),
         .ID_R_WIDTH(ID_R_WIDTH)
