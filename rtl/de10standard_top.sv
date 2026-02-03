@@ -11,11 +11,11 @@ module de10standard_top(
     cosim_top #(
         .CORE_COUNT   (16),
         .AXI_ID_WIDTH (5),
-        .BAUD_RATE    (9_600),
+        .BAUD_RATE    (57_600),
         .CLK_FREQ     (50_000_000)
     ) top (
         .clk_i   (CLOCK_50),
-        .arstn_i (KEY[0]),
+        .arstn_i (GPIO[2]),
         .rx_i    (GPIO[0]),
         .tx_o    (GPIO[1])
     );

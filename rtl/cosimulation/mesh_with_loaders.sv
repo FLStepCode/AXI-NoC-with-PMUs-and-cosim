@@ -78,7 +78,8 @@ module mesh_with_loaders # (
             axi_master_loader #(
                 .ADDR_WIDTH(ADDR_WIDTH),
                 .ID_W_WIDTH(ID_W_WIDTH),
-                .ID_R_WIDTH(ID_R_WIDTH)
+                .ID_R_WIDTH(ID_R_WIDTH),
+                .FIFO_DEPTH(64),
                 `ifdef TID_PRESENT
                 ,
                 .ID_WIDTH(ID_WIDTH)

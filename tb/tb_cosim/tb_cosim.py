@@ -38,7 +38,7 @@ async def test(dut):
     await source.write(int.to_bytes(1, 1, 'little'))
     await source.wait()
 
-    for i in range(32):
+    for i in range(64):
         dest = random.randint(1, 16)
 
         await source.write(int.to_bytes(3, 1, 'little'))
