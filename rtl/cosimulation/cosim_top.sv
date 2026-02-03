@@ -1,7 +1,7 @@
 module cosim_top #(
     parameter CORE_COUNT    = 16,
     parameter AXI_ID_WIDTH  = 5,
-    parameter BAUD_RATE     = 9_600,
+    parameter BAUD_RATE     = 10_000_000,
     parameter CLK_FREQ      = 50_000_000
 ) (
     input  logic clk_i,
@@ -11,8 +11,8 @@ module cosim_top #(
 );
 
     logic [4:0]              pmu_addr   [CORE_COUNT];
-    logic [63:0]             pmu_data   [CORE_COUNT];
-    logic [7:0]              req_depth              ;
+    logic [31:0]             pmu_data   [CORE_COUNT];
+    logic                    resp_wait  [CORE_COUNT];
     logic [AXI_ID_WIDTH-1:0] id         [CORE_COUNT];
     logic                    write      [CORE_COUNT];
     logic [7:0]              axlen      [CORE_COUNT];
@@ -20,20 +20,22 @@ module cosim_top #(
     logic                    start                  ;
     logic                    idle       [CORE_COUNT];
 
+    logic                    rstn_noc;
+
     mesh_with_loaders mesh_with_loaders (
         .aclk        (clk_i),
-        .aresetn     (arstn_i),
+        .aresetn     (rstn_noc ),
 
         .pmu_addr_i  (pmu_addr ),
         .pmu_data_o  (pmu_data ),
 
-        .req_depth_i (req_depth),
+        .resp_wait_i (resp_wait),
         .id_i        (id       ),
         .write_i     (write    ),
         .axlen_i     (axlen    ),
         .fifo_push_i (fifo_push),
         .start_i     (start    ),
-        .idle_o      (idle     )      
+        .idle_o      (idle     )
     );
 
     uart_control #(
@@ -50,13 +52,15 @@ module cosim_top #(
         .pmu_addr_o   (pmu_addr ),
         .pmu_data_i   (pmu_data ),
 
-        .req_depth_o  (req_depth),
+        .resp_wait_o  (resp_wait),
         .id_o         (id       ),
         .write_o      (write    ),
         .axlen_o      (axlen    ),
         .fifo_push_o  (fifo_push),
         .start_o      (start    ),
-        .idle_i       (idle     )
+        .idle_i       (idle     ),
+        
+        .rstn_o      (rstn_noc )
     );
     
 endmodule

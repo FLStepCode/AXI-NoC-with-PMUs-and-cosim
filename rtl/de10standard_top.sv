@@ -8,7 +8,12 @@ module de10standard_top(
     inout    [35: 0]   GPIO
 );
 
-    cosim_top top (
+    cosim_top #(
+        .CORE_COUNT   (16),
+        .AXI_ID_WIDTH (5),
+        .BAUD_RATE    (9_600),
+        .CLK_FREQ     (50_000_000)
+    ) top (
         .clk_i   (CLOCK_50),
         .arstn_i (KEY[0]),
         .rx_i    (GPIO[0]),
